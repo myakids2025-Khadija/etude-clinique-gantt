@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diagramme de Gantt — Étude de Réalisation d'une Clinique</title>
-    <meta name="description" content="Diagramme de Gantt interactif pour le suivi des phases d'une étude de réalisation d'une clinique médicale.">
+    <title>Planning de Réalisation — Pôle Médical</title>
+    <meta name="description" content="Diagramme de Gantt interactif — Planning de réalisation d'un pôle médical, délai d'exécution 16 mois.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -25,16 +25,11 @@
             --accent-orange: #f97316;
             --accent-teal: #14b8a6;
             --accent-indigo: #6366f1;
-            --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.15);
             --glass-bg: rgba(26, 34, 53, 0.7);
             --glass-border: rgba(255, 255, 255, 0.08);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
@@ -44,42 +39,28 @@
             overflow-x: hidden;
         }
 
-        /* ─── Animated Background ─── */
         .bg-effects {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 0; overflow: hidden;
         }
 
         .bg-effects .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.12;
+            position: absolute; border-radius: 50%;
+            filter: blur(100px); opacity: 0.12;
             animation: float 20s ease-in-out infinite;
         }
 
         .bg-effects .orb:nth-child(1) {
-            width: 600px; height: 600px;
-            background: var(--accent-blue);
+            width: 600px; height: 600px; background: var(--accent-blue);
             top: -10%; left: -5%;
-            animation-delay: 0s;
         }
-
         .bg-effects .orb:nth-child(2) {
-            width: 500px; height: 500px;
-            background: var(--accent-purple);
-            bottom: -10%; right: -5%;
-            animation-delay: -7s;
+            width: 500px; height: 500px; background: var(--accent-purple);
+            bottom: -10%; right: -5%; animation-delay: -7s;
         }
-
         .bg-effects .orb:nth-child(3) {
-            width: 400px; height: 400px;
-            background: var(--accent-cyan);
-            top: 50%; left: 40%;
-            animation-delay: -14s;
+            width: 400px; height: 400px; background: var(--accent-cyan);
+            top: 50%; left: 40%; animation-delay: -14s;
         }
 
         @keyframes float {
@@ -90,434 +71,323 @@
 
         /* ─── Header ─── */
         .header {
-            position: relative;
-            z-index: 10;
-            padding: 32px 48px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            position: relative; z-index: 10;
+            padding: 28px 48px;
             border-bottom: 1px solid var(--glass-border);
             backdrop-filter: blur(20px);
             background: rgba(10, 14, 26, 0.8);
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+        .header-top {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px;
         }
 
+        .header-left { display: flex; align-items: center; gap: 16px; }
+
         .header-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 52px; height: 52px; border-radius: 14px;
             background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
         }
 
         .header h1 {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
             background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .header p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 2px;
+        .header .subtitle {
+            font-size: 12px; color: var(--text-muted); margin-top: 3px;
+            max-width: 600px; line-height: 1.4;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .header-badges {
+            display: flex; gap: 12px; align-items: center;
         }
 
-        .total-badge {
-            padding: 10px 20px;
-            border-radius: 12px;
+        .badge {
+            padding: 10px 20px; border-radius: 12px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             backdrop-filter: blur(10px);
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent-cyan);
+            font-size: 13px; font-weight: 600;
         }
 
-        .total-badge span {
-            color: var(--text-muted);
-            font-weight: 400;
+        .badge.primary { color: var(--accent-cyan); }
+        .badge.secondary { color: var(--accent-amber); }
+        .badge span { color: var(--text-muted); font-weight: 400; }
+
+        .delai-bar {
+            margin-top: 12px; padding: 12px 20px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            font-size: 13px; color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .delai-bar strong { color: var(--accent-blue); font-weight: 700; }
+
+        /* ─── Zoom Controls ─── */
+        .controls-bar {
+            position: relative; z-index: 10;
+            padding: 16px 48px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .progress-info {
+            display: flex; gap: 20px; align-items: center;
+        }
+
+        .progress-item {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 12px; color: var(--text-secondary);
+        }
+
+        .progress-dot {
+            width: 8px; height: 8px; border-radius: 50%;
         }
 
         .zoom-controls {
-            display: flex;
-            gap: 4px;
+            display: flex; gap: 4px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 4px;
+            border-radius: 12px; padding: 4px;
         }
 
         .zoom-btn {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 36px; height: 36px; border: none;
+            background: transparent; color: var(--text-secondary);
+            border-radius: 8px; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
             transition: all 0.2s;
         }
 
-        .zoom-btn:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
+        .zoom-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .zoom-btn.active { background: var(--accent-blue); color: white; }
 
-        .zoom-btn.active {
-            background: var(--accent-blue);
-            color: white;
-        }
-
-        /* ─── Stats Bar ─── */
-        .stats-bar {
-            position: relative;
-            z-index: 10;
-            padding: 20px 48px;
-            display: flex;
-            gap: 16px;
+        /* ─── Gantt Container ─── */
+        .gantt-container {
+            position: relative; z-index: 10;
+            padding: 0 48px 48px;
             overflow-x: auto;
-            scrollbar-width: none;
         }
 
-        .stats-bar::-webkit-scrollbar { display: none; }
-
-        .stat-card {
-            flex: 0 0 auto;
-            min-width: 180px;
-            padding: 16px 20px;
-            border-radius: 16px;
+        .gantt-wrapper {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
+            border-radius: 20px;
             backdrop-filter: blur(10px);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
             overflow: hidden;
         }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            border-radius: 16px 16px 0 0;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .stat-card.active {
-            border-color: rgba(59, 130, 246, 0.4);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 4px;
-        }
-
-        /* ─── Main Layout ─── */
-        .main-container {
-            position: relative;
-            z-index: 10;
-            padding: 20px 48px 48px;
-            display: flex;
-            gap: 0;
-        }
-
-        /* ─── Sidebar (Phase Labels) ─── */
-        .sidebar {
-            flex: 0 0 300px;
-            position: sticky;
-            left: 0;
-            z-index: 5;
-        }
-
-        .sidebar-header {
-            height: 48px;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .phase-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0 16px;
-            height: 56px;
-            border-bottom: 1px solid rgba(42, 53, 80, 0.4);
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .phase-row:hover {
-            background: var(--bg-hover);
-        }
-
-        .phase-row.expanded {
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .phase-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .phase-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .phase-name {
-            font-size: 13px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .phase-duration {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 1px;
-        }
-
-        .phase-toggle {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted);
-            font-size: 12px;
-            transition: all 0.3s;
-        }
-
-        .phase-row.expanded .phase-toggle {
-            transform: rotate(90deg);
-            color: var(--accent-blue);
-        }
-
-        .sub-task-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 0 16px 0 42px;
-            height: 40px;
-            border-bottom: 1px solid rgba(42, 53, 80, 0.2);
-            background: rgba(0, 0, 0, 0.15);
-            transition: all 0.2s;
-            overflow: hidden;
-        }
-
-        .sub-task-row:hover {
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .sub-task-row .task-name {
-            font-size: 12px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-        }
-
-        .sub-task-row .task-dur {
-            font-size: 10px;
-            color: var(--text-muted);
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        /* ─── Gantt Area ─── */
-        .gantt-area {
-            flex: 1;
-            overflow-x: auto;
-            overflow-y: hidden;
-            border-left: 1px solid var(--border);
-            scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
-        }
-
-        .gantt-area::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .gantt-area::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .gantt-area::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        .gantt-timeline {
+        /* ─── Table Layout ─── */
+        .gantt-table {
+            display: grid;
+            grid-template-columns: 280px 1fr;
             min-width: 100%;
         }
 
+        /* Left panel - task names */
+        .task-panel {
+            border-right: 1px solid var(--border);
+        }
+
+        .task-panel-header {
+            height: 52px;
+            display: flex; align-items: center;
+            padding: 0 20px;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .task-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 20px;
+            height: 52px;
+            border-bottom: 1px solid rgba(42, 53, 80, 0.3);
+            transition: background 0.2s;
+            cursor: default;
+        }
+
+        .task-item:hover { background: var(--bg-hover); }
+
+        .task-item:last-child { border-bottom: none; }
+
+        .task-color {
+            width: 4px; height: 28px;
+            border-radius: 2px; flex-shrink: 0;
+        }
+
+        .task-info { flex: 1; min-width: 0; }
+
+        .task-name {
+            font-size: 13px; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .task-duration {
+            font-size: 11px; color: var(--text-muted); margin-top: 1px;
+        }
+
+        .task-start-badge {
+            font-size: 10px; font-weight: 600;
+            padding: 2px 8px; border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted); flex-shrink: 0;
+        }
+
+        /* Right panel - timeline */
+        .timeline-panel {
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .timeline-scroll {
+            min-width: 100%;
+            position: relative;
+        }
+
         .timeline-header {
-            height: 48px;
+            height: 52px;
             display: flex;
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: var(--bg-primary);
-            z-index: 2;
+            background: rgba(0, 0, 0, 0.2);
+            position: sticky; top: 0; z-index: 2;
         }
 
         .timeline-month {
             flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700;
             color: var(--text-muted);
             border-right: 1px solid rgba(42, 53, 80, 0.3);
             position: relative;
         }
 
-        .timeline-month.current {
-            color: var(--accent-blue);
+        .timeline-month .month-label {
+            font-size: 10px; font-weight: 500;
+            color: var(--text-muted); opacity: 0.7;
+            margin-top: 2px;
         }
 
-        .timeline-month.current::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--accent-blue);
+        .timeline-month.ods {
+            color: var(--accent-rose);
+            background: rgba(244, 63, 94, 0.08);
+        }
+
+        .timeline-month.reception {
+            color: var(--accent-emerald);
+            background: rgba(16, 185, 129, 0.08);
         }
 
         .gantt-row {
-            height: 56px;
+            height: 52px;
             position: relative;
-            border-bottom: 1px solid rgba(42, 53, 80, 0.4);
+            border-bottom: 1px solid rgba(42, 53, 80, 0.3);
         }
 
-        .gantt-row.sub-row {
-            height: 40px;
-            background: rgba(0, 0, 0, 0.15);
-            border-bottom: 1px solid rgba(42, 53, 80, 0.2);
+        .gantt-row:last-child { border-bottom: none; }
+
+        .gantt-row:hover { background: rgba(59, 130, 246, 0.03); }
+
+        /* Grid lines */
+        .grid-line {
+            position: absolute; top: 0; bottom: 0;
+            width: 1px; background: rgba(42, 53, 80, 0.2);
+            pointer-events: none;
         }
 
+        .grid-line.major { background: rgba(42, 53, 80, 0.4); }
+
+        /* Bars */
         .gantt-bar {
             position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 32px;
-            border-radius: 8px;
+            top: 50%; transform: translateY(-50%);
+            height: 30px; border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            font-size: 11px;
-            font-weight: 600;
+            display: flex; align-items: center;
+            padding: 0 10px;
+            font-size: 11px; font-weight: 600;
             color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
         }
 
         .gantt-bar::before {
             content: '';
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             border-radius: inherit;
-            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 50%);
             pointer-events: none;
         }
 
         .gantt-bar:hover {
-            transform: translateY(-50%) scale(1.03);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-50%) scaleY(1.15);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
             z-index: 10;
         }
 
-        .gantt-row.sub-row .gantt-bar {
-            height: 22px;
+        .gantt-bar.milestone {
+            width: 28px !important; height: 28px;
             border-radius: 6px;
+            transform: translateY(-50%) rotate(45deg);
+            padding: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .gantt-bar.milestone:hover {
+            transform: translateY(-50%) rotate(45deg) scale(1.2);
+        }
+
+        .gantt-bar.milestone .milestone-inner {
+            transform: rotate(-45deg);
             font-size: 10px;
-            opacity: 0.85;
         }
 
-        .gantt-row.sub-row .gantt-bar:hover {
-            opacity: 1;
-        }
-
-        /* Grid lines */
-        .grid-line {
+        /* ─── ODS & Reception markers ─── */
+        .marker {
             position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 1px;
-            background: rgba(42, 53, 80, 0.2);
+            top: 0; bottom: 0;
+            width: 2px; z-index: 3;
             pointer-events: none;
+        }
+
+        .marker.ods { background: var(--accent-rose); left: 0; }
+
+        .marker.reception { background: var(--accent-emerald); }
+
+        .marker-label {
+            position: absolute; top: 6px;
+            font-size: 9px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            white-space: nowrap;
+            padding: 2px 6px; border-radius: 4px;
+        }
+
+        .marker.ods .marker-label {
+            color: var(--accent-rose);
+            background: rgba(244, 63, 94, 0.15);
+            left: 6px;
+        }
+
+        .marker.reception .marker-label {
+            color: var(--accent-emerald);
+            background: rgba(16, 185, 129, 0.15);
+            right: 6px;
         }
 
         /* ─── Tooltip ─── */
         .tooltip {
-            position: fixed;
-            z-index: 1000;
+            position: fixed; z-index: 1000;
             padding: 16px 20px;
             background: var(--bg-card);
             border: 1px solid var(--glass-border);
@@ -525,155 +395,65 @@
             backdrop-filter: blur(20px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             pointer-events: none;
-            opacity: 0;
-            transform: translateY(8px);
+            opacity: 0; transform: translateY(8px);
             transition: all 0.2s ease;
-            max-width: 320px;
+            max-width: 340px;
         }
 
-        .tooltip.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tooltip-title {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .tooltip-detail {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
+        .tooltip.visible { opacity: 1; transform: translateY(0); }
+        .tooltip-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+        .tooltip-detail { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
         .tooltip-meta {
-            display: flex;
-            gap: 16px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid var(--border);
+            display: flex; gap: 16px; margin-top: 10px;
+            padding-top: 10px; border-top: 1px solid var(--border);
+            flex-wrap: wrap;
         }
-
-        .tooltip-meta-item {
-            font-size: 11px;
-        }
-
-        .tooltip-meta-item span {
-            color: var(--text-muted);
-        }
-
-        /* ─── Today marker ─── */
-        .today-marker {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--accent-rose);
-            z-index: 3;
-            pointer-events: none;
-        }
-
-        .today-marker::before {
-            content: "Aujourd'hui";
-            position: absolute;
-            top: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 9px;
-            font-weight: 700;
-            color: var(--accent-rose);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        /* ─── Animations ─── */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50%) scaleX(0.3);
-                transform-origin: left center;
-            }
-            to {
-                opacity: 1;
-                transform: translateY(-50%) scaleX(1);
-            }
-        }
-
-        .gantt-bar.animate {
-            animation: slideIn 0.6s ease-out forwards;
-        }
-
-        .sub-task-row, .gantt-row.sub-row {
-            max-height: 0;
-            opacity: 0;
-            transition: max-height 0.35s ease, opacity 0.25s ease;
-            border-bottom: none;
-        }
-
-        .sub-task-row.visible, .gantt-row.sub-row.visible {
-            max-height: 60px;
-            opacity: 1;
-            border-bottom: 1px solid rgba(42, 53, 80, 0.2);
-        }
+        .tooltip-meta-item { font-size: 11px; }
+        .tooltip-meta-item span { color: var(--text-muted); }
 
         /* ─── Legend ─── */
         .legend {
-            position: relative;
-            z-index: 10;
+            position: relative; z-index: 10;
             padding: 0 48px 32px;
         }
 
         .legend-container {
-            padding: 20px 24px;
+            padding: 18px 24px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             backdrop-filter: blur(10px);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: center;
+            display: flex; flex-wrap: wrap;
+            gap: 16px; align-items: center;
         }
 
         .legend-title {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-right: 8px;
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin-right: 8px;
         }
 
         .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; color: var(--text-secondary);
         }
 
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 4px;
+        .legend-swatch {
+            width: 14px; height: 8px; border-radius: 3px;
         }
 
-        /* ─── Responsive ─── */
+        /* ─── Animations ─── */
+        @keyframes barSlide {
+            from { opacity: 0; transform: translateY(-50%) scaleX(0); transform-origin: left center; }
+            to { opacity: 1; transform: translateY(-50%) scaleX(1); }
+        }
+
+        .gantt-bar.animate { animation: barSlide 0.5s ease-out forwards; }
+
         @media (max-width: 1024px) {
-            .header { padding: 20px 24px; }
-            .stats-bar { padding: 16px 24px; }
-            .main-container { padding: 16px 24px 32px; }
-            .sidebar { flex: 0 0 220px; }
-            .legend { padding: 0 24px 24px; }
-        }
-
-        @media (max-width: 768px) {
-            .header { flex-direction: column; gap: 16px; align-items: flex-start; }
-            .sidebar { flex: 0 0 180px; }
-            .stat-card { min-width: 140px; }
+            .header, .controls-bar, .gantt-container, .legend { padding-left: 24px; padding-right: 24px; }
+            .task-panel-header, .task-item { padding: 0 12px; }
+            .gantt-table { grid-template-columns: 220px 1fr; }
         }
     </style>
 </head>
@@ -686,31 +466,54 @@
 </div>
 
 <header class="header">
-    <div class="header-left">
-        <div class="header-icon">🏥</div>
-        <div>
-            <h1>Étude de Réalisation — Clinique</h1>
-            <p>Diagramme de Gantt interactif • 9 phases • 34 à 56 mois</p>
+    <div class="header-top">
+        <div class="header-left">
+            <div class="header-icon">🏗️</div>
+            <div>
+                <h1>PLANNING DE RÉALISATION</h1>
+                <p class="subtitle">Réalisation des travaux d'un pôle médical</p>
+            </div>
+        </div>
+        <div class="header-badges">
+            <div class="badge primary"><span>Délai :</span> 16 mois</div>
+            <div class="badge secondary"><span>Tâches :</span> 12</div>
         </div>
     </div>
-    <div class="header-right">
-        <div class="total-badge">
-            <span>Durée totale :</span> 34 – 56 mois
-        </div>
-        <div class="zoom-controls">
-            <button class="zoom-btn" onclick="setZoom(0.6)" title="Zoom arrière">−</button>
-            <button class="zoom-btn active" onclick="setZoom(1)" title="Réinitialiser">⊙</button>
-            <button class="zoom-btn" onclick="setZoom(1.5)" title="Zoom avant">+</button>
-        </div>
+    <div class="delai-bar">
+        <strong>Délai d'exécution :</strong> à partir de l'ODS notifié au service co-contractant par le service contractant.
     </div>
 </header>
 
-<div class="stats-bar" id="statsBar"></div>
+<div class="controls-bar">
+    <div class="progress-info">
+        <div class="progress-item">
+            <div class="progress-dot" style="background: var(--accent-rose)"></div>
+            ODS (Ordre de Service)
+        </div>
+        <div class="progress-item">
+            <div class="progress-dot" style="background: var(--accent-emerald)"></div>
+            Réception provisoire
+        </div>
+        <div class="progress-item">
+            <div class="progress-dot" style="background: var(--accent-blue)"></div>
+            Mois 0 → 16
+        </div>
+    </div>
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="setZoom(0.7)" title="Zoom arrière">−</button>
+        <button class="zoom-btn active" onclick="setZoom(1)" title="Réinitialiser">⊙</button>
+        <button class="zoom-btn" onclick="setZoom(1.5)" title="Zoom avant">+</button>
+    </div>
+</div>
 
-<div class="main-container">
-    <div class="sidebar" id="sidebar"></div>
-    <div class="gantt-area" id="ganttArea">
-        <div class="gantt-timeline" id="ganttTimeline"></div>
+<div class="gantt-container">
+    <div class="gantt-wrapper">
+        <div class="gantt-table">
+            <div class="task-panel" id="taskPanel"></div>
+            <div class="timeline-panel" id="timelinePanel">
+                <div class="timeline-scroll" id="timelineScroll"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -723,432 +526,301 @@
 </div>
 
 <script>
-// ─── Data ───
-const PHASES = [
+const TOTAL_MONTHS = 17; // 0 to 16 inclusive
+let monthWidth = 75;
+
+// ─── Task data (from image, scaled to 16 months) ───
+const TASKS = [
     {
-        id: 1,
-        name: "Programmation & Faisabilité",
-        shortName: "Programmation",
+        name: "Installation de chantier",
+        duration: "10 jours",
         startMonth: 0,
-        durationMin: 2,
-        durationMax: 4,
-        color: "#3b82f6",
+        endMonth: 0.35,
+        color: "#ef4444",
+        gradient: "linear-gradient(135deg, #ef4444, #dc2626)",
+        detail: "Mise en place base vie, clôtures, branchements provisoires, signalisation chantier"
+    },
+    {
+        name: "Terrassements / Excavations",
+        duration: "2 mois",
+        startMonth: 0.35,
+        endMonth: 2.35,
+        color: "#b91c1c",
+        gradient: "linear-gradient(135deg, #b91c1c, #991b1b)",
+        detail: "Fouilles en pleine masse, excavations, évacuation des déblais, nivellement"
+    },
+    {
+        name: "Infrastructure",
+        duration: "5 mois",
+        startMonth: 2,
+        endMonth: 7,
+        color: "#92400e",
+        gradient: "linear-gradient(135deg, #b45309, #92400e)",
+        detail: "Fondations, semelles, longrines, dallage, murs de soubassement"
+    },
+    {
+        name: "Superstructure",
+        duration: "8 mois",
+        startMonth: 4.5,
+        endMonth: 12.5,
+        color: "#2563eb",
         gradient: "linear-gradient(135deg, #3b82f6, #2563eb)",
-        tasks: [
-            { name: "Analyse des besoins", dur: "2–3 sem.", start: 0, len: 0.7, detail: "Nombre de lits, spécialités médicales, plateaux techniques, urgences, imagerie, bloc opératoire" },
-            { name: "Étude de faisabilité", dur: "3–4 sem.", start: 0.5, len: 0.9, detail: "Analyse du terrain, contraintes urbanistiques (PLU), accessibilité, réseaux existants" },
-            { name: "Programme fonctionnel", dur: "3–4 sem.", start: 1.2, len: 0.9, detail: "Surfaces utiles par service, flux patients/personnel/logistique, normes sanitaires" },
-            { name: "Étude budgétaire", dur: "1–2 sem.", start: 2.2, len: 0.5, detail: "Estimation globale du coût (€/m²), enveloppe financière" },
-            { name: "Montage administratif", dur: "2–4 sem.", start: 2.8, len: 1, detail: "Choix du mode de consultation, constitution du dossier maître d'ouvrage" },
-        ]
+        detail: "Poteaux, poutres, planchers, voiles, escaliers, acrotères"
     },
     {
-        id: 2,
-        name: "Esquisse (ESQ)",
-        shortName: "Esquisse",
-        startMonth: 4,
-        durationMin: 1,
-        durationMax: 2,
-        color: "#8b5cf6",
+        name: "Maçonnerie et enduits",
+        duration: "8 mois",
+        startMonth: 5,
+        endMonth: 13,
+        color: "#16a34a",
+        gradient: "linear-gradient(135deg, #22c55e, #16a34a)",
+        detail: "Murs en briques/parpaings, cloisons, enduits intérieurs et extérieurs"
+    },
+    {
+        name: "VRD",
+        duration: "11 mois",
+        startMonth: 2.5,
+        endMonth: 13.5,
+        color: "#15803d",
+        gradient: "linear-gradient(135deg, #15803d, #166534)",
+        detail: "Voiries, réseaux divers, assainissement, AEP, espaces extérieurs"
+    },
+    {
+        name: "Électricité / Plomberie",
+        duration: "11 mois",
+        startMonth: 3,
+        endMonth: 14,
+        color: "#0ea5e9",
+        gradient: "linear-gradient(135deg, #38bdf8, #0ea5e9)",
+        detail: "Réseaux électriques courants forts/faibles, plomberie sanitaire, alimentation eau"
+    },
+    {
+        name: "Climatisation / Chauffage",
+        duration: "10.5 mois",
+        startMonth: 3,
+        endMonth: 13.5,
+        color: "#7c3aed",
         gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-        tasks: [
-            { name: "Parti architectural", dur: "2–3 sem.", start: 0, len: 0.7, detail: "Volumétrie, implantation sur le terrain, orientation, accès" },
-            { name: "Schémas fonctionnels", dur: "1–2 sem.", start: 0.5, len: 0.5, detail: "Organisation des flux : patients ambulatoires, hospitalisés, urgences, logistique, DASRI" },
-            { name: "Premières esquisses", dur: "1–2 sem.", start: 0.8, len: 0.5, detail: "Plans masse, coupes de principe, perspectives" },
-            { name: "Validation MOA", dur: "1 sem.", start: 1.5, len: 0.3, detail: "Présentation, échanges, validation du parti retenu" },
-        ]
+        detail: "CVC, climatisation centrale, chauffage, ventilation, gaines techniques"
     },
     {
-        id: 3,
-        name: "Avant-Projet Sommaire (APS)",
-        shortName: "APS",
+        name: "Finition sol / Peinture",
+        duration: "8.5 mois",
         startMonth: 6,
-        durationMin: 2,
-        durationMax: 3,
-        color: "#06b6d4",
-        gradient: "linear-gradient(135deg, #06b6d4, #0891b2)",
-        tasks: [
-            { name: "Plans au 1/200e", dur: "3–4 sem.", start: 0, len: 0.9, detail: "Plans de chaque niveau, coupes, façades" },
-            { name: "Pré-dimensionnement structure", dur: "2 sem.", start: 0.8, len: 0.5, detail: "Trames structurelles, type de structure (béton, métal, mixte)" },
-            { name: "Pré-étude lots techniques", dur: "2–3 sem.", start: 1.0, len: 0.7, detail: "CVC, fluides médicaux (O₂, vide, air comprimé), électricité" },
-            { name: "Estimation budgétaire", dur: "1–2 sem.", start: 1.5, len: 0.5, detail: "Coût par lot, ratio €/m², comparaison avec l'enveloppe" },
-            { name: "Conformité réglementaire", dur: "2 sem.", start: 1.8, len: 0.5, detail: "Normes ERP type U, accessibilité PMR, sécurité incendie, ARS" },
-            { name: "Validation APS", dur: "1 sem.", start: 2.5, len: 0.3, detail: "Présentation au maître d'ouvrage et aux autorités sanitaires" },
-        ]
+        endMonth: 14.5,
+        color: "#c2410c",
+        gradient: "linear-gradient(135deg, #ea580c, #c2410c)",
+        detail: "Revêtements de sol (carrelage, PVC médical), peinture, faux-plafonds, menuiseries"
     },
     {
-        id: 4,
-        name: "Avant-Projet Définitif (APD)",
-        shortName: "APD",
-        startMonth: 9,
-        durationMin: 2,
-        durationMax: 3,
-        color: "#10b981",
-        gradient: "linear-gradient(135deg, #10b981, #059669)",
-        tasks: [
-            { name: "Plans au 1/100e", dur: "3–4 sem.", start: 0, len: 0.9, detail: "Plans détaillés par service (bloc, imagerie, hospitalisation, urgences)" },
-            { name: "Choix constructifs", dur: "2 sem.", start: 0.8, len: 0.5, detail: "Matériaux, revêtements normes hygiène, menuiseries, cloisons" },
-            { name: "Études techniques", dur: "3–4 sem.", start: 1.0, len: 0.9, detail: "CVC, traitement d'air salles blanches, fluides médicaux, groupe électrogène" },
-            { name: "Coût prévisionnel", dur: "1–2 sem.", start: 1.8, len: 0.5, detail: "Estimation détaillée par lot, planning prévisionnel travaux" },
-            { name: "Permis de construire", dur: "2–4 sem.", start: 2.0, len: 0.8, detail: "Constitution et dépôt du dossier PC" },
-            { name: "Validation APD", dur: "1 sem.", start: 2.7, len: 0.3, detail: "Approbation finale avant passage en phase projet" },
-        ]
+        name: "Nettoyage",
+        duration: "1.5 mois",
+        startMonth: 14,
+        endMonth: 15.3,
+        color: "#eab308",
+        gradient: "linear-gradient(135deg, #facc15, #eab308)",
+        detail: "Nettoyage général de fin de chantier, évacuation gravats, nettoyage vitres et sols"
     },
     {
-        id: 5,
-        name: "Projet (PRO)",
-        shortName: "PRO",
-        startMonth: 12,
-        durationMin: 3,
-        durationMax: 4,
-        color: "#f59e0b",
-        gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
-        tasks: [
-            { name: "Plans d'exécution 1/50e", dur: "4–6 sem.", start: 0, len: 1.3, detail: "Plans détaillés pièce par pièce, coupes techniques, détails constructifs" },
-            { name: "CCTP par lot", dur: "4–6 sem.", start: 0.8, len: 1.3, detail: "Gros œuvre, second œuvre, CVC, électricité, fluides médicaux, équipements" },
-            { name: "Planification équipements", dur: "2–3 sem.", start: 2.0, len: 0.7, detail: "Lits, tables d'opération, imagerie (scanner, IRM), stérilisation" },
-            { name: "Bordereaux de prix", dur: "2 sem.", start: 2.5, len: 0.5, detail: "Quantitatifs détaillés par lot" },
-            { name: "Coordination BIM", dur: "continu", start: 0, len: 3.5, detail: "Maquette numérique, détection des conflits inter-lots" },
-        ]
-    },
-    {
-        id: 6,
-        name: "DCE & Consultation",
-        shortName: "DCE",
-        startMonth: 16,
-        durationMin: 2,
-        durationMax: 3,
-        color: "#f43f5e",
-        gradient: "linear-gradient(135deg, #f43f5e, #e11d48)",
-        tasks: [
-            { name: "Constitution du DCE", dur: "2–3 sem.", start: 0, len: 0.7, detail: "Plans, CCTP, DPGF, RC, CCAP" },
-            { name: "Publication appel d'offres", dur: "1 sem.", start: 0.7, len: 0.3, detail: "BOAMP/JOUE ou consultation privée" },
-            { name: "Période de consultation", dur: "4–6 sem.", start: 1.0, len: 1.3, detail: "Réponses aux questions entreprises, visites de site" },
-            { name: "Analyse des offres", dur: "2–3 sem.", start: 2.0, len: 0.6, detail: "Comparaison technique et financière, rapport d'analyse" },
-            { name: "Attribution marchés", dur: "1–2 sem.", start: 2.5, len: 0.4, detail: "Notification, signature des marchés" },
-        ]
-    },
-    {
-        id: 7,
-        name: "Exécution & Synthèse (EXE)",
-        shortName: "EXE/SYN",
-        startMonth: 19,
-        durationMin: 2,
-        durationMax: 3,
-        color: "#6366f1",
-        gradient: "linear-gradient(135deg, #6366f1, #4f46e5)",
-        tasks: [
-            { name: "Plans exécution entreprises", dur: "4–6 sem.", start: 0, len: 1.3, detail: "Plans de ferraillage, réservations, réseaux" },
-            { name: "Synthèse technique", dur: "3–4 sem.", start: 0.5, len: 0.9, detail: "Coordination de tous les lots, résolution des conflits" },
-            { name: "Plans de synthèse", dur: "2–3 sem.", start: 1.5, len: 0.6, detail: "Superposition de tous les réseaux, validation" },
-            { name: "Visa architecte/BET", dur: "continu", start: 0, len: 2.8, detail: "Validation continue des plans d'exécution" },
-        ]
-    },
-    {
-        id: 8,
-        name: "Chantier (DET)",
-        shortName: "Chantier",
-        startMonth: 22,
-        durationMin: 18,
-        durationMax: 30,
-        color: "#f97316",
-        gradient: "linear-gradient(135deg, #f97316, #ea580c)",
-        tasks: [
-            { name: "Installation chantier", dur: "2–4 sem.", start: 0, len: 1, detail: "Base vie, clôtures, grues, VRD provisoires" },
-            { name: "Terrassement & fondations", dur: "1–3 mois", start: 0.8, len: 3, detail: "Fouilles, fondations profondes ou superficielles" },
-            { name: "Gros œuvre", dur: "4–8 mois", start: 3, len: 8, detail: "Structure béton/métal, planchers, voiles" },
-            { name: "Clos & couvert", dur: "2–3 mois", start: 9, len: 3, detail: "Étanchéité, façades, menuiseries extérieures" },
-            { name: "Second œuvre", dur: "4–8 mois", start: 11, len: 7, detail: "Cloisons, faux-plafonds, revêtements, menuiseries intérieures" },
-            { name: "Lots techniques", dur: "4–8 mois", start: 10, len: 8, detail: "CVC, électricité, plomberie, fluides médicaux, gaz médicaux" },
-            { name: "Équipements spécifiques", dur: "2–3 mois", start: 20, len: 3, detail: "Imagerie (IRM, scanner), bloc opératoire, stérilisation" },
-            { name: "Finitions", dur: "1–2 mois", start: 23, len: 2, detail: "Peinture, signalétique, aménagements extérieurs" },
-        ]
-    },
-    {
-        id: 9,
-        name: "Réception (AOR)",
-        shortName: "Réception",
-        startMonth: 48,
-        durationMin: 2,
-        durationMax: 4,
+        name: "Essais + Formation + Pré-exploitation",
+        duration: "1.5 mois",
+        startMonth: 14,
+        endMonth: 15.5,
         color: "#14b8a6",
-        gradient: "linear-gradient(135deg, #14b8a6, #0d9488)",
-        tasks: [
-            { name: "Pré-réception", dur: "2–3 sem.", start: 0, len: 0.7, detail: "Vérifications internes, essais techniques" },
-            { name: "Commissions de sécurité", dur: "2–4 sem.", start: 0.5, len: 0.8, detail: "Commission ERP, avis ARS, conformité incendie" },
-            { name: "OPR", dur: "2–3 sem.", start: 1.2, len: 0.6, detail: "Opérations Préalables à la Réception, inspection contradictoire" },
-            { name: "Levée des réserves", dur: "2–4 sem.", start: 1.8, len: 0.8, detail: "Corrections par les entreprises" },
-            { name: "Réception définitive", dur: "1 sem.", start: 2.5, len: 0.3, detail: "Procès-verbal de réception" },
-            { name: "Mise en service", dur: "2–4 sem.", start: 2.8, len: 0.8, detail: "Formation du personnel, rodage des installations, inauguration" },
-        ]
+        gradient: "linear-gradient(135deg, #2dd4bf, #14b8a6)",
+        detail: "Essais techniques des installations, formation du personnel, mise en route progressive"
+    },
+    {
+        name: "Réception provisoire",
+        duration: "—",
+        startMonth: 16,
+        endMonth: 16,
+        color: "#10b981",
+        gradient: "linear-gradient(135deg, #34d399, #10b981)",
+        detail: "Réception provisoire des travaux, PV de réception, levée des réserves",
+        isMilestone: true
     }
 ];
 
-const TOTAL_MONTHS = 56;
-let monthWidth = 80;
-let expandedPhases = new Set();
-
-// ─── Initialize ───
 function init() {
-    renderStats();
-    renderSidebar();
-    renderGantt();
+    renderTaskPanel();
+    renderTimeline();
     renderLegend();
-    animateBars();
 }
 
-// ─── Stats Bar ───
-function renderStats() {
-    const container = document.getElementById('statsBar');
-    container.innerHTML = '';
+function renderTaskPanel() {
+    const panel = document.getElementById('taskPanel');
+    let html = '<div class="task-panel-header">Tâches du projet</div>';
 
-    PHASES.forEach(phase => {
-        const card = document.createElement('div');
-        card.className = 'stat-card';
-        card.style.cssText = `--phase-color: ${phase.color}`;
-        card.innerHTML = `
-            <div style="position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;background:${phase.color}"></div>
-            <div class="stat-number" style="color:${phase.color}">${phase.durationMin}–${phase.durationMax}</div>
-            <div class="stat-label">mois • Phase ${phase.id}</div>
-        `;
-        card.onclick = () => scrollToPhase(phase.id);
-        container.appendChild(card);
-    });
-}
-
-// ─── Sidebar ───
-function renderSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.innerHTML = '<div class="sidebar-header">Phases du projet</div>';
-
-    PHASES.forEach(phase => {
-        const row = document.createElement('div');
-        row.className = 'phase-row';
-        row.id = `phase-label-${phase.id}`;
-        row.innerHTML = `
-            <div class="phase-dot" style="background:${phase.color};box-shadow:0 0 8px ${phase.color}60"></div>
-            <div class="phase-info">
-                <div class="phase-name">${phase.name}</div>
-                <div class="phase-duration">${phase.durationMin}–${phase.durationMax} mois</div>
+    TASKS.forEach((task, i) => {
+        const startLabel = task.isMilestone ? `M${Math.round(task.startMonth)}` : `M${Math.ceil(task.startMonth)}`;
+        html += `
+            <div class="task-item" id="task-label-${i}">
+                <div class="task-color" style="background:${task.color}"></div>
+                <div class="task-info">
+                    <div class="task-name">${task.name}</div>
+                    <div class="task-duration">${task.duration}</div>
+                </div>
+                <div class="task-start-badge">${startLabel}</div>
             </div>
-            <div class="phase-toggle">▶</div>
         `;
-        row.onclick = () => togglePhase(phase.id);
-        sidebar.appendChild(row);
-
-        // Sub-tasks
-        phase.tasks.forEach((task, ti) => {
-            const subRow = document.createElement('div');
-            subRow.className = `sub-task-row phase-${phase.id}-sub`;
-            subRow.innerHTML = `
-                <div class="task-name">${task.name}</div>
-                <div class="task-dur">${task.dur}</div>
-            `;
-            sidebar.appendChild(subRow);
-        });
     });
+
+    panel.innerHTML = html;
 }
 
-// ─── Gantt Chart ───
-function renderGantt() {
-    const timeline = document.getElementById('ganttTimeline');
-    timeline.innerHTML = '';
-    timeline.style.width = (TOTAL_MONTHS * monthWidth) + 'px';
+function renderTimeline() {
+    const scroll = document.getElementById('timelineScroll');
+    scroll.innerHTML = '';
+    scroll.style.width = (TOTAL_MONTHS * monthWidth) + 'px';
 
-    // Timeline header
+    // Header with month numbers
     const header = document.createElement('div');
     header.className = 'timeline-header';
-
-    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
     for (let m = 0; m < TOTAL_MONTHS; m++) {
         const monthDiv = document.createElement('div');
         monthDiv.className = 'timeline-month';
         monthDiv.style.width = monthWidth + 'px';
 
-        const yearNum = Math.floor(m / 12) + 1;
-        const monthIdx = m % 12;
-        monthDiv.textContent = `${monthNames[monthIdx]} A${yearNum}`;
-
-        if (m % 6 === 0) {
-            monthDiv.style.fontWeight = '700';
-            monthDiv.style.color = 'var(--text-secondary)';
+        if (m === 0) {
+            monthDiv.classList.add('ods');
+            monthDiv.innerHTML = `<span>ODS</span><span class="month-label">Mois 0</span>`;
+        } else if (m === 16) {
+            monthDiv.classList.add('reception');
+            monthDiv.innerHTML = `<span>${m}</span><span class="month-label">Réc. Prov.</span>`;
+        } else {
+            monthDiv.innerHTML = `<span>${m}</span><span class="month-label">Mois ${m}</span>`;
         }
 
         header.appendChild(monthDiv);
     }
-    timeline.appendChild(header);
+    scroll.appendChild(header);
 
     // Rows container
     const rowsContainer = document.createElement('div');
     rowsContainer.style.position = 'relative';
 
-    PHASES.forEach(phase => {
-        // Main phase row
+    TASKS.forEach((task, i) => {
         const row = document.createElement('div');
         row.className = 'gantt-row';
-        row.id = `gantt-row-${phase.id}`;
+        row.id = `gantt-row-${i}`;
 
         // Grid lines
         for (let m = 0; m < TOTAL_MONTHS; m++) {
-            if (m % 6 === 0) {
-                const line = document.createElement('div');
-                line.className = 'grid-line';
-                line.style.left = (m * monthWidth) + 'px';
-                row.appendChild(line);
-            }
+            const line = document.createElement('div');
+            line.className = 'grid-line' + (m % 4 === 0 ? ' major' : '');
+            line.style.left = (m * monthWidth) + 'px';
+            row.appendChild(line);
         }
 
-        // Phase bar
-        const bar = document.createElement('div');
-        bar.className = 'gantt-bar animate';
-        bar.style.left = (phase.startMonth * monthWidth + 4) + 'px';
-        bar.style.width = (phase.durationMax * monthWidth - 8) + 'px';
-        bar.style.background = phase.gradient;
-        bar.style.animationDelay = (phase.id * 0.08) + 's';
-        bar.textContent = phase.shortName;
+        // ODS marker (month 0)
+        if (i === 0) {
+            const odsMarker = document.createElement('div');
+            odsMarker.className = 'marker ods';
+            odsMarker.style.left = '0px';
+            odsMarker.innerHTML = '<div class="marker-label">ODS</div>';
+            row.appendChild(odsMarker);
+        }
 
-        bar.onmouseenter = (e) => showTooltip(e, phase.name, `Durée : ${phase.durationMin}–${phase.durationMax} mois`, phase);
-        bar.onmouseleave = hideTooltip;
-        bar.onmousemove = moveTooltip;
+        // Reception marker (month 16)
+        if (i === TASKS.length - 1) {
+            const recMarker = document.createElement('div');
+            recMarker.className = 'marker reception';
+            recMarker.style.left = (16 * monthWidth) + 'px';
+            recMarker.innerHTML = '<div class="marker-label">RÉC.</div>';
+            row.appendChild(recMarker);
+        }
 
-        row.appendChild(bar);
+        // Bar
+        if (task.isMilestone) {
+            const bar = document.createElement('div');
+            bar.className = 'gantt-bar milestone animate';
+            bar.style.left = (task.startMonth * monthWidth - 14) + 'px';
+            bar.style.background = task.gradient;
+            bar.style.animationDelay = (i * 0.06) + 's';
+            bar.innerHTML = '<span class="milestone-inner">◆</span>';
+            bar.onmouseenter = (e) => showTooltip(e, task);
+            bar.onmouseleave = hideTooltip;
+            bar.onmousemove = moveTooltip;
+            row.appendChild(bar);
+        } else {
+            const bar = document.createElement('div');
+            bar.className = 'gantt-bar animate';
+            const leftPx = task.startMonth * monthWidth + 2;
+            const widthPx = Math.max((task.endMonth - task.startMonth) * monthWidth - 4, 24);
+            bar.style.left = leftPx + 'px';
+            bar.style.width = widthPx + 'px';
+            bar.style.background = task.gradient;
+            bar.style.animationDelay = (i * 0.06) + 's';
+
+            if (widthPx > 90) {
+                bar.textContent = task.name;
+            }
+
+            bar.onmouseenter = (e) => showTooltip(e, task);
+            bar.onmouseleave = hideTooltip;
+            bar.onmousemove = moveTooltip;
+            row.appendChild(bar);
+        }
+
         rowsContainer.appendChild(row);
-
-        // Sub-task rows
-        phase.tasks.forEach((task, ti) => {
-            const subRow = document.createElement('div');
-            subRow.className = `gantt-row sub-row phase-${phase.id}-gantt-sub`;
-
-            // Grid lines
-            for (let m = 0; m < TOTAL_MONTHS; m++) {
-                if (m % 6 === 0) {
-                    const line = document.createElement('div');
-                    line.className = 'grid-line';
-                    line.style.left = (m * monthWidth) + 'px';
-                    subRow.appendChild(line);
-                }
-            }
-
-            const subBar = document.createElement('div');
-            subBar.className = 'gantt-bar';
-            const taskStartPx = (phase.startMonth + task.start) * monthWidth + 4;
-            const taskWidthPx = task.len * monthWidth - 4;
-            subBar.style.left = taskStartPx + 'px';
-            subBar.style.width = Math.max(taskWidthPx, 30) + 'px';
-            subBar.style.background = phase.color + 'cc';
-
-            if (taskWidthPx > 80) {
-                subBar.textContent = task.name;
-            }
-
-            subBar.onmouseenter = (e) => showTooltip(e, task.name, task.detail, phase, task);
-            subBar.onmouseleave = hideTooltip;
-            subBar.onmousemove = moveTooltip;
-
-            subRow.appendChild(subBar);
-            rowsContainer.appendChild(subRow);
-        });
     });
 
-    timeline.appendChild(rowsContainer);
+    scroll.appendChild(rowsContainer);
+
+    // Animate bars in
+    setTimeout(() => {
+        document.querySelectorAll('.gantt-bar.animate').forEach((bar, i) => {
+            bar.style.opacity = '0';
+            setTimeout(() => { bar.style.opacity = '1'; }, i * 60);
+        });
+    }, 100);
 }
 
-// ─── Toggle Phase ───
-function togglePhase(id) {
-    const label = document.getElementById(`phase-label-${id}`);
-    const subLabels = document.querySelectorAll(`.phase-${id}-sub`);
-    const subRows = document.querySelectorAll(`.phase-${id}-gantt-sub`);
-
-    if (expandedPhases.has(id)) {
-        expandedPhases.delete(id);
-        label.classList.remove('expanded');
-        subLabels.forEach(el => el.classList.remove('visible'));
-        subRows.forEach(el => el.classList.remove('visible'));
-    } else {
-        expandedPhases.add(id);
-        label.classList.add('expanded');
-        subLabels.forEach(el => el.classList.add('visible'));
-        subRows.forEach(el => el.classList.add('visible'));
-    }
-}
-
-// ─── Zoom ───
 function setZoom(level) {
-    monthWidth = 80 * level;
+    monthWidth = 75 * level;
     document.querySelectorAll('.zoom-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
-    renderGantt();
-
-    // Re-expand previously expanded phases
-    expandedPhases.forEach(id => {
-        document.getElementById(`phase-label-${id}`)?.classList.add('expanded');
-        document.querySelectorAll(`.phase-${id}-gantt-sub`).forEach(el => el.classList.add('visible'));
-    });
+    renderTimeline();
 }
 
-// ─── Tooltip ───
-function showTooltip(e, title, detail, phase, task = null) {
+function showTooltip(e, task) {
     const tooltip = document.getElementById('tooltip');
-    const titleEl = document.getElementById('tooltipTitle');
-    const detailEl = document.getElementById('tooltipDetail');
-    const metaEl = document.getElementById('tooltipMeta');
+    document.getElementById('tooltipTitle').textContent = task.name;
+    document.getElementById('tooltipTitle').style.color = task.color;
+    document.getElementById('tooltipDetail').textContent = task.detail;
 
-    titleEl.textContent = title;
-    titleEl.style.color = phase.color;
-    detailEl.textContent = detail;
-
-    let metaHTML = `<div class="tooltip-meta-item"><span>Phase :</span> ${phase.id}</div>`;
-    if (task) {
-        metaHTML += `<div class="tooltip-meta-item"><span>Durée :</span> ${task.dur}</div>`;
+    let meta = `<div class="tooltip-meta-item"><span>Durée :</span> ${task.duration}</div>`;
+    if (!task.isMilestone) {
+        meta += `<div class="tooltip-meta-item"><span>Début :</span> Mois ${Math.round(task.startMonth * 10) / 10}</div>`;
+        meta += `<div class="tooltip-meta-item"><span>Fin :</span> Mois ${Math.round(task.endMonth * 10) / 10}</div>`;
     } else {
-        metaHTML += `<div class="tooltip-meta-item"><span>Durée :</span> ${phase.durationMin}–${phase.durationMax} mois</div>`;
+        meta += `<div class="tooltip-meta-item"><span>Jalon :</span> Mois 16</div>`;
     }
-    metaHTML += `<div class="tooltip-meta-item"><span>Début :</span> Mois ${phase.startMonth + 1}</div>`;
-    metaEl.innerHTML = metaHTML;
-
+    document.getElementById('tooltipMeta').innerHTML = meta;
     tooltip.classList.add('visible');
     moveTooltip(e);
 }
 
 function moveTooltip(e) {
     const tooltip = document.getElementById('tooltip');
-    const x = Math.min(e.clientX + 16, window.innerWidth - 340);
-    const y = Math.min(e.clientY + 16, window.innerHeight - 160);
-    tooltip.style.left = x + 'px';
-    tooltip.style.top = y + 'px';
+    tooltip.style.left = Math.min(e.clientX + 16, window.innerWidth - 360) + 'px';
+    tooltip.style.top = Math.min(e.clientY + 16, window.innerHeight - 160) + 'px';
 }
 
 function hideTooltip() {
     document.getElementById('tooltip').classList.remove('visible');
 }
 
-// ─── Scroll to Phase ───
-function scrollToPhase(id) {
-    const row = document.getElementById(`gantt-row-${id}`);
-    if (row) {
-        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Flash effect
-        row.style.background = 'rgba(59, 130, 246, 0.1)';
-        setTimeout(() => { row.style.background = ''; }, 1200);
-    }
-
-    // Expand phase
-    if (!expandedPhases.has(id)) {
-        togglePhase(id);
-    }
-}
-
-// ─── Legend ───
 function renderLegend() {
     const container = document.getElementById('legend');
     let html = '<div class="legend-container"><span class="legend-title">Légende</span>';
-    PHASES.forEach(phase => {
+    TASKS.forEach(task => {
         html += `
             <div class="legend-item">
-                <div class="legend-color" style="background:${phase.gradient}"></div>
-                <span>Phase ${phase.id} — ${phase.shortName}</span>
+                <div class="legend-swatch" style="background:${task.gradient}"></div>
+                ${task.name}
             </div>
         `;
     });
@@ -1156,18 +828,6 @@ function renderLegend() {
     container.innerHTML = html;
 }
 
-// ─── Animate bars ───
-function animateBars() {
-    const bars = document.querySelectorAll('.gantt-bar.animate');
-    bars.forEach((bar, i) => {
-        bar.style.opacity = '0';
-        setTimeout(() => {
-            bar.style.opacity = '1';
-        }, i * 80);
-    });
-}
-
-// ─── Init ───
 document.addEventListener('DOMContentLoaded', init);
 </script>
 
