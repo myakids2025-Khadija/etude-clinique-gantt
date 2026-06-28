@@ -386,8 +386,86 @@
         }
         .gantt-bar.animate { animation: barSlide 0.5s ease-out forwards; }
 
+        /* ─── Section Divider ─── */
+        .section-divider {
+            position: relative; z-index: 10;
+            padding: 60px 48px 20px;
+            text-align: center;
+        }
+        .divider-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), var(--accent-cyan), transparent);
+            margin-bottom: 32px;
+        }
+        .section-divider h2 {
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-amber), var(--accent-orange));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .section-divider .section-sub {
+            font-size: 13px; color: var(--text-muted);
+        }
+        .version-badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 12px; font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .version-badge.v1 {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-blue);
+        }
+        .version-badge.v2 {
+            background: rgba(249, 115, 22, 0.15);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: var(--accent-orange);
+        }
+        .comparison-table {
+            position: relative; z-index: 10;
+            padding: 0 48px 24px;
+        }
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .comparison-table th {
+            padding: 12px 16px;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.25);
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .comparison-table th.col-24 { color: var(--accent-blue); }
+        .comparison-table th.col-16 { color: var(--accent-orange); }
+        .comparison-table th.col-arrow { text-align: center; width: 40px; }
+        .comparison-table td {
+            padding: 10px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(42, 53, 80, 0.25);
+        }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:hover td { background: rgba(59, 130, 246, 0.03); }
+        .comparison-table td.task-col { font-weight: 600; color: var(--text-primary); }
+        .comparison-table td.arrow-col { text-align: center; color: var(--accent-amber); font-size: 14px; }
+        .comparison-table td.val-24 { color: var(--accent-blue); font-weight: 600; }
+        .comparison-table td.val-16 { color: var(--accent-orange); font-weight: 600; }
+
         @media (max-width: 1024px) {
-            .header, .controls-bar, .gantt-container, .legend { padding-left: 24px; padding-right: 24px; }
+            .header, .controls-bar, .gantt-container, .legend, .section-divider, .comparison-table { padding-left: 24px; padding-right: 24px; }
             .gantt-table { grid-template-columns: 230px 1fr; }
         }
     </style>
@@ -450,6 +528,81 @@
 
 <div class="legend" id="legend"></div>
 
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- ═══════════  VERSION 2 — PLANNING 16 MOIS  ═══════════ -->
+<!-- ════════════════════════════════════════════════════════ -->
+
+<div class="section-divider">
+    <div class="divider-line"></div>
+    <h2>VERSION 2 — PLANNING RECALCULÉ SUR 16 MOIS</h2>
+    <p class="section-sub">Facteur de compression ×0.667 appliqué à toutes les durées et dates de début</p>
+    <span class="version-badge v2">Délai optimisé : 16 mois</span>
+</div>
+
+<!-- Comparison Table -->
+<div class="comparison-table">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tâche</th>
+                <th class="col-24">Version 24 mois</th>
+                <th class="col-arrow"></th>
+                <th class="col-16">Version 16 mois</th>
+                <th class="col-16">Début</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td class="task-col">Installation de chantier</td><td class="val-24">15 jours</td><td class="arrow-col">→</td><td class="val-16">10 jours</td><td>M0</td></tr>
+            <tr><td>2</td><td class="task-col">Terrassements / Excavations</td><td class="val-24">3 mois</td><td class="arrow-col">→</td><td class="val-16">2 mois</td><td>10J</td></tr>
+            <tr><td>3</td><td class="task-col">Infrastructure</td><td class="val-24">7 mois</td><td class="arrow-col">→</td><td class="val-16">5 mois</td><td>M2</td></tr>
+            <tr><td>4</td><td class="task-col">Superstructure</td><td class="val-24">12 mois</td><td class="arrow-col">→</td><td class="val-16">8 mois</td><td>M5</td></tr>
+            <tr><td>5</td><td class="task-col">Maçonnerie et enduits</td><td class="val-24">12 mois</td><td class="arrow-col">→</td><td class="val-16">8 mois</td><td>M5</td></tr>
+            <tr><td>6</td><td class="task-col">VRD</td><td class="val-24">17 mois</td><td class="arrow-col">→</td><td class="val-16">11 mois</td><td>M2½</td></tr>
+            <tr><td>7</td><td class="task-col">Électricité / Plomberie</td><td class="val-24">17 mois</td><td class="arrow-col">→</td><td class="val-16">11 mois</td><td>M3</td></tr>
+            <tr><td>8</td><td class="task-col">Clim / Chauffage central</td><td class="val-24">16 mois</td><td class="arrow-col">→</td><td class="val-16">11 mois</td><td>M3</td></tr>
+            <tr><td>9</td><td class="task-col">Finition sol / Peinture</td><td class="val-24">13 mois</td><td class="arrow-col">→</td><td class="val-16">9 mois</td><td>M6</td></tr>
+            <tr><td>10</td><td class="task-col">Nettoyage</td><td class="val-24">2 mois</td><td class="arrow-col">→</td><td class="val-16">1 mois ½</td><td>M14</td></tr>
+            <tr><td>11</td><td class="task-col">Essais + Formation</td><td class="val-24">2 mois ½</td><td class="arrow-col">→</td><td class="val-16">1 mois ½</td><td>M14</td></tr>
+            <tr><td>12</td><td class="task-col">◆ Réception provisoire</td><td class="val-24">Mois 24</td><td class="arrow-col">→</td><td class="val-16">Mois 16</td><td>M16</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- V2 Controls -->
+<div class="controls-bar">
+    <div class="progress-info">
+        <div class="progress-item">
+            <div class="progress-dot" style="background: var(--accent-rose)"></div>
+            ODS (Ordre de Service)
+        </div>
+        <div class="progress-item">
+            <div class="progress-dot" style="background: var(--accent-emerald)"></div>
+            Réception provisoire — Mois 16
+        </div>
+    </div>
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="setZoomV2(0.6)" title="Zoom arrière">−</button>
+        <button class="zoom-btn active" id="zoomV2Default" onclick="setZoomV2(1)" title="Réinitialiser">⊙</button>
+        <button class="zoom-btn" onclick="setZoomV2(1.5)" title="Zoom avant">+</button>
+    </div>
+</div>
+
+<!-- V2 Gantt -->
+<div class="gantt-container">
+    <div class="gantt-wrapper">
+        <div class="gantt-table">
+            <div class="task-panel" id="taskPanelV2"></div>
+            <div class="timeline-panel" id="timelinePanelV2">
+                <div class="timeline-scroll" id="timelineScrollV2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="legend" id="legendV2"></div>
+
+<!-- Shared Tooltip -->
 <div class="tooltip" id="tooltip">
     <div class="tooltip-title" id="tooltipTitle"></div>
     <div class="tooltip-detail" id="tooltipDetail"></div>
@@ -775,6 +928,307 @@ function renderLegend() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ══════════════════════════════════════════════════════
+// ═══════  VERSION 2 — PLANNING 16 MOIS  ═════════════
+// ══════════════════════════════════════════════════════
+
+const TOTAL_MONTHS_V2 = 17; // 0..16 inclus
+let monthWidthV2 = 75;
+
+const TASKS_V2 = [
+    {
+        name: "Installation de chantier",
+        duration: "10 jours",
+        startMonth: 0,
+        endMonth: 0.33,
+        startLabel: "ODS",
+        color: "#ef4444",
+        gradient: "linear-gradient(135deg, #ef4444, #dc2626)",
+        detail: "Mise en place base vie, clôtures, branchements provisoires, signalisation chantier"
+    },
+    {
+        name: "Terrassements / Excavations",
+        duration: "2 mois",
+        startMonth: 0.33,
+        endMonth: 2.33,
+        startLabel: "10J",
+        color: "#b91c1c",
+        gradient: "linear-gradient(135deg, #c53030, #9b2c2c)",
+        detail: "Fouilles en pleine masse, excavations, évacuation des déblais, nivellement du terrain"
+    },
+    {
+        name: "Infrastructure",
+        duration: "5 mois",
+        startMonth: 2,
+        endMonth: 7,
+        startLabel: "2ème mois",
+        color: "#b45309",
+        gradient: "linear-gradient(135deg, #d97706, #b45309)",
+        detail: "Fondations, semelles, longrines, dallage, murs de soubassement, cuvelage"
+    },
+    {
+        name: "Superstructure",
+        duration: "8 mois",
+        startMonth: 5,
+        endMonth: 13,
+        startLabel: "5ème mois",
+        color: "#2563eb",
+        gradient: "linear-gradient(135deg, #3b82f6, #2563eb)",
+        detail: "Poteaux, poutres, planchers, voiles, escaliers, acrotères, structure béton armé"
+    },
+    {
+        name: "Maçonnerie et enduits",
+        duration: "8 mois",
+        startMonth: 5,
+        endMonth: 13,
+        startLabel: "5ème mois",
+        color: "#16a34a",
+        gradient: "linear-gradient(135deg, #22c55e, #16a34a)",
+        detail: "Murs en briques/parpaings, cloisons de distribution, enduits intérieurs et extérieurs"
+    },
+    {
+        name: "VRD",
+        duration: "11 mois",
+        startMonth: 2.5,
+        endMonth: 13.5,
+        startLabel: "2ème mois et demi",
+        color: "#15803d",
+        gradient: "linear-gradient(135deg, #16a34a, #15803d)",
+        detail: "Voiries et réseaux divers, assainissement, AEP, espaces extérieurs, trottoirs, parking"
+    },
+    {
+        name: "Électricité / Plomberie",
+        duration: "11 mois",
+        startMonth: 3,
+        endMonth: 14,
+        startLabel: "3ème mois",
+        color: "#0ea5e9",
+        gradient: "linear-gradient(135deg, #38bdf8, #0ea5e9)",
+        detail: "Réseaux électriques courants forts et faibles, plomberie sanitaire, alimentation en eau"
+    },
+    {
+        name: "Climatisation / Chauffage central",
+        duration: "11 mois",
+        startMonth: 3,
+        endMonth: 14,
+        startLabel: "3ème mois",
+        color: "#7c3aed",
+        gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+        detail: "Climatisation centrale, chauffage central, ventilation mécanique, gaines techniques"
+    },
+    {
+        name: "Finition sol / Peinture",
+        duration: "9 mois",
+        startMonth: 6,
+        endMonth: 15,
+        startLabel: "6ème mois",
+        color: "#c2410c",
+        gradient: "linear-gradient(135deg, #ea580c, #c2410c)",
+        detail: "Revêtements de sol (carrelage, PVC), peinture intérieure/extérieure, faux-plafonds, menuiseries"
+    },
+    {
+        name: "Nettoyage",
+        duration: "1 mois et demi",
+        startMonth: 14,
+        endMonth: 15.5,
+        startLabel: "14ème mois",
+        color: "#eab308",
+        gradient: "linear-gradient(135deg, #facc15, #eab308)",
+        detail: "Nettoyage général de fin de chantier, évacuation gravats résiduels, nettoyage vitres et sols"
+    },
+    {
+        name: "Essais + Formation + Pré-exploitation",
+        duration: "1 mois et demi",
+        startMonth: 14,
+        endMonth: 15.5,
+        startLabel: "14ème mois",
+        color: "#14b8a6",
+        gradient: "linear-gradient(135deg, #2dd4bf, #14b8a6)",
+        detail: "Essais techniques des installations, formation du personnel, mise en route progressive des équipements"
+    },
+    {
+        name: "Réception provisoire",
+        duration: "16ème mois",
+        startMonth: 16,
+        endMonth: 16,
+        startLabel: "16ème mois",
+        color: "#10b981",
+        gradient: "linear-gradient(135deg, #34d399, #10b981)",
+        detail: "Réception provisoire des travaux, procès-verbal de réception, levée des réserves éventuelles",
+        isMilestone: true
+    }
+];
+
+function initV2() {
+    renderTaskPanelV2();
+    renderTimelineV2();
+    renderLegendV2();
+}
+
+function renderTaskPanelV2() {
+    const panel = document.getElementById('taskPanelV2');
+    let html = '<div class="task-panel-header">Désignation des tâches — V2 (16 mois)</div>';
+    TASKS_V2.forEach((task, i) => {
+        html += `
+            <div class="task-item">
+                <div class="task-color" style="background:${task.color}"></div>
+                <div class="task-info">
+                    <div class="task-name">${task.name}</div>
+                    <div class="task-duration">${task.isMilestone ? 'Jalon' : task.duration}</div>
+                </div>
+                <div class="task-start-badge">${task.startLabel}</div>
+            </div>
+        `;
+    });
+    panel.innerHTML = html;
+}
+
+function renderTimelineV2() {
+    const scroll = document.getElementById('timelineScrollV2');
+    scroll.innerHTML = '';
+    scroll.style.width = (TOTAL_MONTHS_V2 * monthWidthV2) + 'px';
+
+    const header = document.createElement('div');
+    header.className = 'timeline-header';
+    for (let m = 0; m < TOTAL_MONTHS_V2; m++) {
+        const div = document.createElement('div');
+        div.className = 'timeline-month';
+        div.style.width = monthWidthV2 + 'px';
+        if (m === 0) {
+            div.classList.add('ods');
+            div.innerHTML = `<span>ODS</span><span class="month-sub">Mois 0</span>`;
+        } else if (m === 16) {
+            div.classList.add('reception');
+            div.innerHTML = `<span>${m}</span><span class="month-sub">Réc. Prov.</span>`;
+        } else {
+            let sub = '';
+            if (m % 4 === 0) sub = `<span class="month-sub">Mois ${m}</span>`;
+            div.innerHTML = `<span>${m}</span>${sub}`;
+        }
+        header.appendChild(div);
+    }
+    scroll.appendChild(header);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.style.position = 'relative';
+
+    TASKS_V2.forEach((task, i) => {
+        const row = document.createElement('div');
+        row.className = 'gantt-row';
+
+        for (let m = 0; m < TOTAL_MONTHS_V2; m++) {
+            const line = document.createElement('div');
+            line.className = 'grid-line' + (m % 4 === 0 ? ' major' : '');
+            line.style.left = (m * monthWidthV2) + 'px';
+            row.appendChild(line);
+        }
+
+        if (i === 0) {
+            const marker = document.createElement('div');
+            marker.className = 'marker ods';
+            marker.style.left = '0px';
+            marker.innerHTML = '<div class="marker-label">ODS</div>';
+            row.appendChild(marker);
+        }
+        if (i === TASKS_V2.length - 1) {
+            const marker = document.createElement('div');
+            marker.className = 'marker reception';
+            marker.style.left = (16 * monthWidthV2) + 'px';
+            marker.innerHTML = '<div class="marker-label">Réception</div>';
+            row.appendChild(marker);
+        }
+
+        if (task.isMilestone) {
+            const bar = document.createElement('div');
+            bar.className = 'gantt-bar milestone animate';
+            bar.style.left = (task.startMonth * monthWidthV2 - 14) + 'px';
+            bar.style.background = task.gradient;
+            bar.style.animationDelay = (i * 0.06) + 's';
+            bar.innerHTML = '<span class="milestone-inner">◆</span>';
+            bar.onmouseenter = (e) => showTooltipV2(e, task);
+            bar.onmouseleave = hideTooltip;
+            bar.onmousemove = moveTooltip;
+            row.appendChild(bar);
+        } else {
+            const bar = document.createElement('div');
+            bar.className = 'gantt-bar animate';
+            const leftPx = task.startMonth * monthWidthV2 + 2;
+            const widthPx = Math.max((task.endMonth - task.startMonth) * monthWidthV2 - 4, 20);
+            bar.style.left = leftPx + 'px';
+            bar.style.width = widthPx + 'px';
+            bar.style.background = task.gradient;
+            bar.style.animationDelay = (i * 0.06) + 's';
+
+            let labelText = '';
+            if (widthPx > 160) {
+                labelText = `${task.name} <span class="bar-duration">: ${task.duration}</span>`;
+            } else if (widthPx > 70) {
+                labelText = task.duration;
+            }
+            bar.innerHTML = labelText;
+
+            bar.onmouseenter = (e) => showTooltipV2(e, task);
+            bar.onmouseleave = hideTooltip;
+            bar.onmousemove = moveTooltip;
+            row.appendChild(bar);
+        }
+        rowsContainer.appendChild(row);
+    });
+
+    scroll.appendChild(rowsContainer);
+
+    setTimeout(() => {
+        scroll.querySelectorAll('.gantt-bar.animate').forEach((bar, i) => {
+            bar.style.opacity = '0';
+            setTimeout(() => { bar.style.opacity = '1'; }, i * 60);
+        });
+    }, 100);
+}
+
+function setZoomV2(level) {
+    monthWidthV2 = 75 * level;
+    document.querySelectorAll('.zoom-controls').forEach((ctrl, idx) => {
+        if (idx === 1) {
+            ctrl.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+        }
+    });
+    event.target.classList.add('active');
+    renderTimelineV2();
+}
+
+function showTooltipV2(e, task) {
+    const tt = document.getElementById('tooltip');
+    document.getElementById('tooltipTitle').textContent = task.name;
+    document.getElementById('tooltipTitle').style.color = task.color;
+    document.getElementById('tooltipDetail').textContent = task.detail;
+
+    let meta = '';
+    if (task.isMilestone) {
+        meta = `<div class="tooltip-meta-item"><span>Jalon :</span> Mois 16</div>`;
+        meta += `<div class="tooltip-meta-item"><span>Type :</span> Réception provisoire</div>`;
+    } else {
+        meta += `<div class="tooltip-meta-item"><span>Durée :</span> ${task.duration}</div>`;
+        meta += `<div class="tooltip-meta-item"><span>Début :</span> ${task.startLabel}</div>`;
+        meta += `<div class="tooltip-meta-item"><span>Fin :</span> Mois ${task.endMonth}</div>`;
+    }
+    meta += `<div class="tooltip-meta-item" style="color:var(--accent-orange)"><span>Version :</span> 16 mois</div>`;
+    document.getElementById('tooltipMeta').innerHTML = meta;
+    tt.classList.add('visible');
+    moveTooltip(e);
+}
+
+function renderLegendV2() {
+    const container = document.getElementById('legendV2');
+    let html = '<div class="legend-container"><span class="legend-title">Légende — Version 16 mois</span>';
+    TASKS_V2.forEach(t => {
+        html += `<div class="legend-item"><div class="legend-swatch" style="background:${t.gradient}"></div>${t.name}${t.isMilestone ? '' : ' : ' + t.duration}</div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', initV2);
 </script>
 
 </body>
