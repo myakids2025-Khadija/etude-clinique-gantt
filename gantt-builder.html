@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créateur de Diagramme de Gantt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2235;
+            --bg-hover: #1e293b;
+            --border: #2a3550;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-orange: #f97316;
+            --glass-bg: rgba(26, 34, 53, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ─── Background ─── */
+        .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .bg-effects .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.1; animation: float 20s ease-in-out infinite; }
+        .bg-effects .orb:nth-child(1) { width: 500px; height: 500px; background: var(--accent-blue); top: -10%; left: -5%; }
+        .bg-effects .orb:nth-child(2) { width: 400px; height: 400px; background: var(--accent-purple); bottom: -10%; right: -5%; animation-delay: -7s; }
+        @keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-30px)} }
+
+        /* ─── Top Bar ─── */
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            padding: 14px 32px;
+            background: rgba(10, 14, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .topbar-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .topbar h1 { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+        .topbar .tag {
+            font-size: 10px; font-weight: 600; padding: 3px 10px;
+            border-radius: 50px; background: rgba(59,130,246,0.15);
+            color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* ─── Layout ─── */
+        .app-layout {
+            position: relative; z-index: 10;
+            display: grid; grid-template-columns: 380px 1fr;
+            min-height: calc(100vh - 67px);
+        }
+
+        /* ─── Editor Panel ─── */
+        .editor {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto; padding: 24px;
+        }
+        .editor::-webkit-scrollbar { width: 5px; }
+        .editor::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .section { margin-bottom: 24px; }
+        .section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .field { margin-bottom: 12px; }
+        .field label {
+            display: block; font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 5px;
+        }
+        .field input, .field textarea, .field select {
+            width: 100%; padding: 9px 12px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--bg-primary);
+            color: var(--text-primary); font-family: 'Inter', sans-serif;
+            font-size: 13px; outline: none; transition: border-color 0.2s;
+        }
+        .field input:focus, .field textarea:focus, .field select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        }
+        .field textarea { resize: vertical; min-height: 50px; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* ─── Task List ─── */
+        .task-list { display: flex; flex-direction: column; gap: 6px; }
+
+        .task-card {
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: 10px; padding: 10px 12px;
+            display: grid; grid-template-columns: 30px 1fr auto; gap: 10px;
+            align-items: center; transition: border-color 0.2s;
+        }
+        .task-card:hover { border-color: rgba(59,130,246,0.3); }
+
+        .task-card input[type="color"] {
+            width: 28px; height: 28px; padding: 1px; border-radius: 6px;
+            border: 1px solid var(--border); cursor: pointer; background: var(--bg-card);
+        }
+        .task-card-fields { display: grid; grid-template-columns: 1fr 80px 55px 55px; gap: 6px; }
+        .task-card-fields input {
+            padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 12px; outline: none;
+        }
+        .task-card-fields input:focus { border-color: var(--accent-blue); }
+        .task-card-fields input::placeholder { color: var(--text-muted); }
+
+        .btn-del {
+            width: 26px; height: 26px; border: none; border-radius: 6px;
+            background: rgba(244,63,94,0.1); color: var(--accent-rose);
+            cursor: pointer; font-size: 12px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-del:hover { background: var(--accent-rose); color: white; }
+
+        .btn-add {
+            width: 100%; padding: 10px; border: 2px dashed var(--border);
+            border-radius: 10px; background: transparent; color: var(--text-muted);
+            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; margin-top: 6px;
+        }
+        .btn-add:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        .btn-generate {
+            width: 100%; padding: 13px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white; font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.3); transition: all 0.2s;
+        }
+        .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(59,130,246,0.4); }
+
+        .btn-clear {
+            width: 100%; padding: 10px; margin-top: 8px;
+            border: 1px solid var(--border); border-radius: 10px;
+            background: transparent; color: var(--text-muted);
+            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-clear:hover { border-color: var(--accent-rose); color: var(--accent-rose); }
+
+        /* ─── Preview Panel ─── */
+        .preview {
+            overflow: auto; padding: 32px;
+            background: var(--bg-primary);
+        }
+
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 60vh;
+            text-align: center; color: var(--text-muted);
+        }
+        .empty-state .icon { font-size: 64px; margin-bottom: 20px; opacity: 0.4; }
+        .empty-state h2 { font-size: 20px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
+        .empty-state p { font-size: 13px; max-width: 380px; line-height: 1.6; }
+
+        /* ─── Gantt Preview ─── */
+        .gantt-preview { display: none; }
+        .gantt-preview.visible { display: block; }
+
+        .gantt-header-block {
+            padding: 24px; margin-bottom: 24px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; backdrop-filter: blur(10px);
+        }
+        .gantt-header-block h2 {
+            font-size: 22px; font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .gantt-header-block .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .gantt-header-block .delai {
+            margin-top: 12px; padding: 10px 16px; border-radius: 10px;
+            background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15);
+            font-size: 12px; color: var(--text-secondary);
+        }
+        .gantt-header-block .delai strong { color: var(--accent-blue); }
+        .gantt-header-block .badges { display: flex; gap: 10px; margin-top: 12px; }
+        .gantt-header-block .badge-item {
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+        }
+        .gantt-header-block .badge-item.b1 { color: var(--accent-cyan); }
+        .gantt-header-block .badge-item.b2 { color: var(--accent-amber); }
+
+        .gantt-chart-area {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; overflow: hidden; backdrop-filter: blur(10px);
+        }
+        .gantt-grid {
+            display: grid; grid-template-columns: 260px 1fr;
+        }
+
+        .g-task-panel { border-right: 1px solid var(--border); }
+        .g-task-header {
+            height: 48px; display: flex; align-items: center; padding: 0 16px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);
+        }
+        .g-task-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 16px; height: 46px;
+            border-bottom: 1px solid rgba(42,53,80,0.25);
+        }
+        .g-task-row:last-child { border-bottom: none; }
+        .g-task-dot { width: 4px; height: 24px; border-radius: 2px; flex-shrink: 0; }
+        .g-task-info { flex: 1; min-width: 0; }
+        .g-task-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .g-task-dur { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+        .g-timeline { overflow-x: auto; }
+        .g-timeline::-webkit-scrollbar { height: 6px; }
+        .g-timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .g-timeline-scroll { position: relative; }
+        .g-timeline-header {
+            height: 48px; display: flex;
+            border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);
+        }
+        .g-month {
+            flex: 0 0 auto; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: var(--text-muted);
+            border-right: 1px solid rgba(42,53,80,0.25);
+        }
+        .g-month .msub { font-size: 8px; font-weight: 500; opacity: 0.6; margin-top: 1px; text-transform: uppercase; }
+        .g-month.first { color: var(--accent-rose); background: rgba(244,63,94,0.06); }
+        .g-month.last { color: var(--accent-emerald); background: rgba(16,185,129,0.06); }
+
+        .g-bar-row {
+            height: 46px; position: relative;
+            border-bottom: 1px solid rgba(42,53,80,0.2);
+        }
+        .g-bar-row:last-child { border-bottom: none; }
+        .g-gridline {
+            position: absolute; top: 0; bottom: 0; width: 1px;
+            background: rgba(42,53,80,0.15); pointer-events: none;
+        }
+
+        .g-bar {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            height: 28px; border-radius: 7px; cursor: default;
+            display: flex; align-items: center; padding: 0 8px;
+            font-size: 10px; font-weight: 600; color: white;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: barIn 0.4s ease-out forwards;
+        }
+        .g-bar::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
+            background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        @keyframes barIn { from { opacity:0; transform: translateY(-50%) scaleX(0); transform-origin: left; } to { opacity:1; transform: translateY(-50%) scaleX(1); } }
+
+        .g-bar.milestone {
+            width: 24px !important; height: 24px; border-radius: 5px;
+            transform: translateY(-50%) rotate(45deg); padding: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .g-bar.milestone span { transform: rotate(-45deg); font-size: 9px; }
+
+        /* Legend */
+        .g-legend {
+            margin-top: 16px; padding: 14px 18px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+        }
+        .g-legend-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-right: 6px; }
+        .g-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-secondary); }
+        .g-legend-swatch { width: 12px; height: 6px; border-radius: 3px; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+            padding: 12px 24px; border-radius: 12px; background: var(--accent-emerald);
+            color: white; font-size: 13px; font-weight: 600; z-index: 200;
+            opacity: 0; transition: all 0.3s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 900px) {
+            .app-layout { grid-template-columns: 1fr; }
+            .editor { border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
+            .preview { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-effects"><div class="orb"></div><div class="orb"></div></div>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-icon">📊</div>
+        <h1>Créateur de Diagramme de Gantt</h1>
+    </div>
+    <span class="tag">Éditeur interactif</span>
+</div>
+
+<div class="app-layout">
+    <!-- ═══ EDITOR ═══ -->
+    <div class="editor">
+        <div class="section">
+            <div class="section-title">Informations du projet</div>
+            <div class="field">
+                <label>Titre principal</label>
+                <input type="text" id="inTitle" placeholder="Ex: PLANNING DE RÉALISATION">
+            </div>
+            <div class="field">
+                <label>Sous-titre</label>
+                <input type="text" id="inSubtitle" placeholder="Ex: Réalisation des travaux d'un pôle médical">
+            </div>
+            <div class="field">
+                <label>Délai d'exécution (texte)</label>
+                <textarea id="inDelai" placeholder="Ex: à partir de l'ODS notifié au service co-contractant..."></textarea>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Durée totale (mois)</label>
+                    <input type="number" id="inMonths" value="24" min="1" max="120">
+                </div>
+                <div class="field">
+                    <label>Largeur mois (px)</label>
+                    <input type="number" id="inMonthWidth" value="60" min="30" max="150">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Tâches</div>
+            <div class="task-list" id="taskList"></div>
+            <button class="btn-add" onclick="addTask()">+ Ajouter une tâche</button>
+        </div>
+
+        <div class="section">
+            <button class="btn-generate" onclick="generateChart()">✦ Générer le diagramme</button>
+            <button class="btn-clear" onclick="clearAll()">Tout effacer</button>
+        </div>
+    </div>
+
+    <!-- ═══ PREVIEW ═══ -->
+    <div class="preview">
+        <div class="empty-state" id="emptyState">
+            <div class="icon">📊</div>
+            <h2>Votre diagramme apparaîtra ici</h2>
+            <p>Remplissez les informations du projet et ajoutez vos tâches dans le panneau de gauche, puis cliquez sur <strong>« Générer le diagramme »</strong>.</p>
+        </div>
+        <div class="gantt-preview" id="ganttPreview"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let tasks = [];
+let taskIdCounter = 0;
+
+const COLORS = [
+    '#ef4444','#b91c1c','#b45309','#2563eb','#16a34a','#15803d',
+    '#0ea5e9','#7c3aed','#c2410c','#eab308','#14b8a6','#6366f1',
+    '#ec4899','#8b5cf6','#f97316','#06b6d4','#84cc16','#f43f5e'
+];
+
+function addTask(name='', duration='', start='', end='', color='') {
+    const id = taskIdCounter++;
+    if (!color) color = COLORS[tasks.length % COLORS.length];
+    tasks.push({ id, name, duration, start: parseFloat(start)||0, end: parseFloat(end)||0, color });
+    renderTaskList();
+}
+
+function removeTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    renderTaskList();
+}
+
+function renderTaskList() {
+    const container = document.getElementById('taskList');
+    container.innerHTML = '';
+    tasks.forEach((task, i) => {
+        const div = document.createElement('div');
+        div.className = 'task-card';
+        div.innerHTML = `
+            <input type="color" value="${task.color}" onchange="tasks[${i}].color=this.value">
+            <div class="task-card-fields">
+                <input type="text" value="${task.name}" placeholder="Nom de la tâche" onchange="tasks[${i}].name=this.value">
+                <input type="text" value="${task.duration}" placeholder="Durée" onchange="tasks[${i}].duration=this.value">
+                <input type="number" value="${task.start}" placeholder="Début" step="0.5" min="0" onchange="tasks[${i}].start=parseFloat(this.value)||0">
+                <input type="number" value="${task.end}" placeholder="Fin" step="0.5" min="0" onchange="tasks[${i}].end=parseFloat(this.value)||0">
+            </div>
+            <button class="btn-del" onclick="removeTask(${task.id})">✕</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function darken(hex, amt) {
+    hex = hex.replace('#','');
+    let r = Math.max(0, parseInt(hex.substring(0,2),16) - amt);
+    let g = Math.max(0, parseInt(hex.substring(2,4),16) - amt);
+    let b = Math.max(0, parseInt(hex.substring(4,6),16) - amt);
+    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
+
+function generateChart() {
+    const title = document.getElementById('inTitle').value || 'PLANNING DE RÉALISATION';
+    const subtitle = document.getElementById('inSubtitle').value || '';
+    const delai = document.getElementById('inDelai').value || '';
+    const totalMonths = parseInt(document.getElementById('inMonths').value) || 24;
+    const monthWidth = parseInt(document.getElementById('inMonthWidth').value) || 60;
+    const numMonths = totalMonths + 1;
+
+    if (tasks.length === 0) { showToast('⚠ Ajoutez au moins une tâche'); return; }
+
+    document.getElementById('emptyState').style.display = 'none';
+    const preview = document.getElementById('ganttPreview');
+    preview.classList.add('visible');
+
+    // Header
+    let headerHTML = `<div class="gantt-header-block">
+        <h2>${title}</h2>
+        ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
+        ${delai ? `<div class="delai"><strong>Délai d'exécution :</strong> ${delai}</div>` : ''}
+        <div class="badges">
+            <div class="badge-item b1"><span style="color:var(--text-muted);font-weight:400">Délai :</span> ${totalMonths} mois</div>
+            <div class="badge-item b2"><span style="color:var(--text-muted);font-weight:400">Tâches :</span> ${tasks.length}</div>
+        </div>
+    </div>`;
+
+    // Task panel
+    let taskPanelHTML = `<div class="g-task-header">Désignation des tâches</div>`;
+    tasks.forEach(t => {
+        const isMilestone = t.start === t.end;
+        taskPanelHTML += `<div class="g-task-row">
+            <div class="g-task-dot" style="background:${t.color}"></div>
+            <div class="g-task-info">
+                <div class="g-task-name">${t.name || 'Sans nom'}</div>
+                <div class="g-task-dur">${isMilestone ? 'Jalon' : (t.duration || '')}</div>
+            </div>
+        </div>`;
+    });
+
+    // Timeline header
+    let timeHeaderHTML = '';
+    for (let m = 0; m < numMonths; m++) {
+        let cls = '';
+        let label = `<span>${m}</span>`;
+        if (m === 0) { cls = ' first'; label = `<span>0</span><span class="msub">Début</span>`; }
+        else if (m === totalMonths) { cls = ' last'; label = `<span>${m}</span><span class="msub">Fin</span>`; }
+        else if (m % Math.max(1, Math.floor(totalMonths/6)) === 0) { label = `<span>${m}</span><span class="msub">Mois ${m}</span>`; }
+        timeHeaderHTML += `<div class="g-month${cls}" style="width:${monthWidth}px">${label}</div>`;
+    }
+
+    // Bars
+    let barsHTML = '';
+    tasks.forEach((t, i) => {
+        let gridlines = '';
+        for (let m = 0; m < numMonths; m++) {
+            gridlines += `<div class="g-gridline" style="left:${m * monthWidth}px"></div>`;
+        }
+
+        const isMilestone = t.start === t.end;
+        let barHTML = '';
+        const grad = `linear-gradient(135deg, ${t.color}, ${darken(t.color, 30)})`;
+
+        if (isMilestone) {
+            barHTML = `<div class="g-bar milestone" style="left:${t.start * monthWidth - 12}px;background:${grad};animation-delay:${i*0.05}s"><span>◆</span></div>`;
+        } else {
+            const left = t.start * monthWidth + 2;
+            const width = Math.max((t.end - t.start) * monthWidth - 4, 16);
+            let lbl = '';
+            if (width > 120) lbl = `${t.name}`;
+            else if (width > 60) lbl = t.duration;
+            barHTML = `<div class="g-bar" style="left:${left}px;width:${width}px;background:${grad};animation-delay:${i*0.05}s">${lbl}</div>`;
+        }
+
+        barsHTML += `<div class="g-bar-row">${gridlines}${barHTML}</div>`;
+    });
+
+    // Legend
+    let legendHTML = '<div class="g-legend"><span class="g-legend-title">Légende</span>';
+    tasks.forEach(t => {
+        const isMilestone = t.start === t.end;
+        legendHTML += `<div class="g-legend-item"><div class="g-legend-swatch" style="background:${t.color}"></div>${t.name || 'Sans nom'}${isMilestone ? '' : (t.duration ? ' : '+t.duration : '')}</div>`;
+    });
+    legendHTML += '</div>';
+
+    preview.innerHTML = `
+        ${headerHTML}
+        <div class="gantt-chart-area">
+            <div class="gantt-grid">
+                <div class="g-task-panel">${taskPanelHTML}</div>
+                <div class="g-timeline">
+                    <div class="g-timeline-scroll" style="width:${numMonths * monthWidth}px">
+                        <div class="g-timeline-header">${timeHeaderHTML}</div>
+                        ${barsHTML}
+                    </div>
+                </div>
+            </div>
+        </div>
+        ${legendHTML}
+    `;
+
+    showToast('✓ Diagramme généré avec succès !');
+}
+
+function clearAll() {
+    tasks = [];
+    taskIdCounter = 0;
+    document.getElementById('inTitle').value = '';
+    document.getElementById('inSubtitle').value = '';
+    document.getElementById('inDelai').value = '';
+    document.getElementById('inMonths').value = 24;
+    document.getElementById('inMonthWidth').value = 60;
+    renderTaskList();
+    document.getElementById('ganttPreview').classList.remove('visible');
+    document.getElementById('ganttPreview').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'flex';
+    showToast('Formulaire effacé');
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Init with empty task list
+renderTaskList();
+</script>
+
+</body>
+</html>
