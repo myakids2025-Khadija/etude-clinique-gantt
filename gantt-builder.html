@@ -405,13 +405,20 @@
             </div>
             <div class="field-row">
                 <div class="field">
-                    <label>Durée totale (mois)</label>
-                    <input type="number" id="inMonths" value="24" min="1" max="120">
+                    <label>Unité de temps</label>
+                    <select id="inUnit" onchange="onUnitChange()">
+                        <option value="mois">Mois</option>
+                        <option value="jours">Jours</option>
+                    </select>
                 </div>
                 <div class="field">
-                    <label>Largeur mois (px)</label>
-                    <input type="number" id="inMonthWidth" value="60" min="30" max="150">
+                    <label id="lblTotal">Durée totale (mois)</label>
+                    <input type="number" id="inMonths" value="24" min="1" max="1500">
                 </div>
+            </div>
+            <div class="field">
+                <label id="lblWidth">Largeur par mois (px)</label>
+                <input type="number" id="inMonthWidth" value="60" min="10" max="150">
             </div>
         </div>
 
@@ -450,6 +457,24 @@ const COLORS = [
     '#ec4899','#8b5cf6','#f97316','#06b6d4','#84cc16','#f43f5e'
 ];
 
+function getUnit() { return document.getElementById('inUnit').value; }
+function unitLabel() { return getUnit() === 'jours' ? 'jour' : 'mois'; }
+function unitLabelPlural() { return getUnit() === 'jours' ? 'jours' : 'mois'; }
+
+function onUnitChange() {
+    const u = getUnit();
+    document.getElementById('lblTotal').textContent = u === 'jours' ? 'Durée totale (jours)' : 'Durée totale (mois)';
+    document.getElementById('lblWidth').textContent = u === 'jours' ? 'Largeur par jour (px)' : 'Largeur par mois (px)';
+    if (u === 'jours') {
+        document.getElementById('inMonths').value = 360;
+        document.getElementById('inMonthWidth').value = 18;
+    } else {
+        document.getElementById('inMonths').value = 24;
+        document.getElementById('inMonthWidth').value = 60;
+    }
+    renderTaskList();
+}
+
 function addTask(name='', duration='', start='', end='', color='', description='') {
     const id = taskIdCounter++;
     if (!color) color = COLORS[tasks.length % COLORS.length];
@@ -466,6 +491,10 @@ function renderTaskList() {
     const container = document.getElementById('taskList');
     container.innerHTML = '';
     tasks.forEach((task, i) => {
+        const u = getUnit();
+        const stepVal = u === 'jours' ? '1' : '0.5';
+        const phStart = u === 'jours' ? 'Début (J)' : 'Début (M)';
+        const phEnd = u === 'jours' ? 'Fin (J)' : 'Fin (M)';
         const div = document.createElement('div');
         div.className = 'task-card';
         div.innerHTML = `
@@ -474,8 +503,8 @@ function renderTaskList() {
                 <div class="task-card-fields">
                     <input type="text" value="${task.name}" placeholder="Nom de la tâche" onchange="tasks[${i}].name=this.value">
                     <input type="text" value="${task.duration}" placeholder="Durée" onchange="tasks[${i}].duration=this.value">
-                    <input type="number" value="${task.start}" placeholder="Début" step="0.5" min="0" onchange="tasks[${i}].start=parseFloat(this.value)||0">
-                    <input type="number" value="${task.end}" placeholder="Fin" step="0.5" min="0" onchange="tasks[${i}].end=parseFloat(this.value)||0">
+                    <input type="number" value="${task.start}" placeholder="${phStart}" step="${stepVal}" min="0" onchange="tasks[${i}].start=parseFloat(this.value)||0">
+                    <input type="number" value="${task.end}" placeholder="${phEnd}" step="${stepVal}" min="0" onchange="tasks[${i}].end=parseFloat(this.value)||0">
                 </div>
                 <button class="btn-del" onclick="removeTask(${task.id})">✕</button>
             </div>
@@ -499,9 +528,14 @@ function generateChart() {
     const title = document.getElementById('inTitle').value || 'PLANNING DE RÉALISATION';
     const subtitle = document.getElementById('inSubtitle').value || '';
     const delai = document.getElementById('inDelai').value || '';
-    const totalMonths = parseInt(document.getElementById('inMonths').value) || 24;
-    const monthWidth = parseInt(document.getElementById('inMonthWidth').value) || 60;
-    const numMonths = totalMonths + 1;
+    const totalUnits = parseInt(document.getElementById('inMonths').value) || 24;
+    const unitWidth = parseInt(document.getElementById('inMonthWidth').value) || 60;
+    const unit = getUnit();
+    const uLabel = unitLabelPlural();
+    const isJours = unit === 'jours';
+    // For days mode, group timeline labels to avoid clutter
+    const step = isJours ? Math.max(1, Math.ceil(totalUnits / 40)) : 1;
+    const numCols = Math.floor(totalUnits / step) + 1;
 
     if (tasks.length === 0) { showToast('⚠ Ajoutez au moins une tâche'); return; }
 
@@ -515,7 +549,7 @@ function generateChart() {
         ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
         ${delai ? `<div class="delai"><strong>Délai d'exécution :</strong> ${delai}</div>` : ''}
         <div class="badges">
-            <div class="badge-item b1"><span style="color:var(--text-muted);font-weight:400">Délai :</span> ${totalMonths} mois</div>
+            <div class="badge-item b1"><span style="color:var(--text-muted);font-weight:400">Délai :</span> ${totalUnits} ${uLabel}</div>
             <div class="badge-item b2"><span style="color:var(--text-muted);font-weight:400">Tâches :</span> ${tasks.length}</div>
         </div>
     </div>`;
@@ -535,21 +569,26 @@ function generateChart() {
 
     // Timeline header
     let timeHeaderHTML = '';
-    for (let m = 0; m < numMonths; m++) {
+    const totalWidth = totalUnits * unitWidth;
+    for (let m = 0; m <= totalUnits; m += step) {
         let cls = '';
         let label = `<span>${m}</span>`;
         if (m === 0) { cls = ' first'; label = `<span>0</span><span class="msub">Début</span>`; }
-        else if (m === totalMonths) { cls = ' last'; label = `<span>${m}</span><span class="msub">Fin</span>`; }
-        else if (m % Math.max(1, Math.floor(totalMonths/6)) === 0) { label = `<span>${m}</span><span class="msub">Mois ${m}</span>`; }
-        timeHeaderHTML += `<div class="g-month${cls}" style="width:${monthWidth}px">${label}</div>`;
+        else if (m >= totalUnits) { cls = ' last'; label = `<span>${totalUnits}</span><span class="msub">Fin</span>`; }
+        else if (!isJours && m % Math.max(1, Math.floor(totalUnits/6)) === 0) {
+            label = `<span>${m}</span><span class="msub">${isJours ? 'J' : 'Mois'} ${m}</span>`;
+        } else if (isJours && m % (step * 5) === 0) {
+            label = `<span>${m}</span><span class="msub">J${m}</span>`;
+        }
+        timeHeaderHTML += `<div class="g-month${cls}" style="width:${step * unitWidth}px">${label}</div>`;
     }
 
     // Bars
     let barsHTML = '';
     tasks.forEach((t, i) => {
         let gridlines = '';
-        for (let m = 0; m < numMonths; m++) {
-            gridlines += `<div class="g-gridline" style="left:${m * monthWidth}px"></div>`;
+        for (let m = 0; m <= totalUnits; m += step) {
+            gridlines += `<div class="g-gridline" style="left:${m * unitWidth}px"></div>`;
         }
 
         const isMilestone = t.start === t.end;
@@ -557,10 +596,10 @@ function generateChart() {
         const grad = `linear-gradient(135deg, ${t.color}, ${darken(t.color, 30)})`;
 
         if (isMilestone) {
-            barHTML = `<div class="g-bar milestone" style="left:${t.start * monthWidth - 12}px;background:${grad};animation-delay:${i*0.05}s"><span>◆</span></div>`;
+            barHTML = `<div class="g-bar milestone" style="left:${t.start * unitWidth - 12}px;background:${grad};animation-delay:${i*0.05}s"><span>◆</span></div>`;
         } else {
-            const left = t.start * monthWidth + 2;
-            const width = Math.max((t.end - t.start) * monthWidth - 4, 16);
+            const left = t.start * unitWidth + 2;
+            const width = Math.max((t.end - t.start) * unitWidth - 4, 16);
             let lbl = '';
             if (width > 120) lbl = `${t.name}`;
             else if (width > 60) lbl = t.duration;
@@ -593,7 +632,7 @@ function generateChart() {
                 </div>
                 <div class="desc-card-meta">
                     <span class="desc-card-tag">⏱ <strong>${isMilestone ? 'Jalon' : (t.duration || '—')}</strong></span>
-                    <span class="desc-card-tag">📅 Mois <strong>${t.start}</strong> → <strong>${t.end}</strong></span>
+                    <span class="desc-card-tag">📅 ${isJours ? 'Jour' : 'Mois'} <strong>${t.start}</strong> → <strong>${t.end}</strong></span>
                 </div>
                 ${t.description && t.description.trim() ? `<div class="desc-card-text">${t.description}</div>` : '<div class="desc-card-empty">Aucune description ajoutée</div>'}
             </div>`;
@@ -607,7 +646,7 @@ function generateChart() {
             <div class="gantt-grid">
                 <div class="g-task-panel">${taskPanelHTML}</div>
                 <div class="g-timeline">
-                    <div class="g-timeline-scroll" style="width:${numMonths * monthWidth}px">
+                    <div class="g-timeline-scroll" style="width:${totalWidth + unitWidth}px">
                         <div class="g-timeline-header">${timeHeaderHTML}</div>
                         ${barsHTML}
                     </div>
