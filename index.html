@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planning de Réalisation — Pôle Médical</title>
-    <meta name="description" content="Diagramme de Gantt interactif — Planning de réalisation d'un pôle médical.">
+    <title>Créateur de Diagramme de Gantt</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,8 +22,6 @@
             --accent-amber: #f59e0b;
             --accent-rose: #f43f5e;
             --accent-orange: #f97316;
-            --accent-teal: #14b8a6;
-            --accent-indigo: #6366f1;
             --glass-bg: rgba(26, 34, 53, 0.7);
             --glass-border: rgba(255, 255, 255, 0.08);
         }
@@ -32,1687 +29,530 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        .bg-effects {
-            position: fixed; inset: 0;
-            pointer-events: none; z-index: 0; overflow: hidden;
-        }
-        .bg-effects .orb {
-            position: absolute; border-radius: 50%;
-            filter: blur(100px); opacity: 0.12;
-            animation: float 20s ease-in-out infinite;
-        }
-        .bg-effects .orb:nth-child(1) {
-            width: 600px; height: 600px; background: var(--accent-blue);
-            top: -10%; left: -5%;
-        }
-        .bg-effects .orb:nth-child(2) {
-            width: 500px; height: 500px; background: var(--accent-purple);
-            bottom: -10%; right: -5%; animation-delay: -7s;
-        }
-        .bg-effects .orb:nth-child(3) {
-            width: 400px; height: 400px; background: var(--accent-cyan);
-            top: 50%; left: 40%; animation-delay: -14s;
-        }
+        /* ─── Background ─── */
+        .bg-effects { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .bg-effects .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.1; animation: float 20s ease-in-out infinite; }
+        .bg-effects .orb:nth-child(1) { width: 500px; height: 500px; background: var(--accent-blue); top: -10%; left: -5%; }
+        .bg-effects .orb:nth-child(2) { width: 400px; height: 400px; background: var(--accent-purple); bottom: -10%; right: -5%; animation-delay: -7s; }
+        @keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-30px)} }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(50px, -30px) scale(1.05); }
-            66% { transform: translate(-30px, 40px) scale(0.95); }
-        }
-
-        /* ─── Header ─── */
-        .header {
-            position: relative; z-index: 10;
-            padding: 28px 48px;
-            border-bottom: 1px solid var(--glass-border);
+        /* ─── Top Bar ─── */
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            padding: 14px 32px;
+            background: rgba(10, 14, 26, 0.9);
             backdrop-filter: blur(20px);
-            background: rgba(10, 14, 26, 0.8);
-        }
-        .header-top {
+            border-bottom: 1px solid var(--glass-border);
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 8px;
         }
-        .header-left { display: flex; align-items: center; gap: 16px; }
-        .header-icon {
-            width: 52px; height: 52px; border-radius: 14px;
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .topbar-icon {
+            width: 38px; height: 38px; border-radius: 10px;
             background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
-        .header h1 {
-            font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
+        .topbar h1 { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+        .topbar .tag {
+            font-size: 10px; font-weight: 600; padding: 3px 10px;
+            border-radius: 50px; background: rgba(59,130,246,0.15);
+            color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* ─── Layout ─── */
+        .app-layout {
+            position: relative; z-index: 10;
+            display: grid; grid-template-columns: 380px 1fr;
+            min-height: calc(100vh - 67px);
+        }
+
+        /* ─── Editor Panel ─── */
+        .editor {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto; padding: 24px;
+        }
+        .editor::-webkit-scrollbar { width: 5px; }
+        .editor::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .section { margin-bottom: 24px; }
+        .section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        .field { margin-bottom: 12px; }
+        .field label {
+            display: block; font-size: 11px; font-weight: 600;
+            color: var(--text-secondary); margin-bottom: 5px;
+        }
+        .field input, .field textarea, .field select {
+            width: 100%; padding: 9px 12px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--bg-primary);
+            color: var(--text-primary); font-family: 'Inter', sans-serif;
+            font-size: 13px; outline: none; transition: border-color 0.2s;
+        }
+        .field input:focus, .field textarea:focus, .field select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+        }
+        .field textarea { resize: vertical; min-height: 50px; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* ─── Task List ─── */
+        .task-list { display: flex; flex-direction: column; gap: 6px; }
+
+        .task-card {
+            background: var(--bg-primary); border: 1px solid var(--border);
+            border-radius: 10px; padding: 10px 12px;
+            display: grid; grid-template-columns: 30px 1fr auto; gap: 10px;
+            align-items: center; transition: border-color 0.2s;
+        }
+        .task-card:hover { border-color: rgba(59,130,246,0.3); }
+
+        .task-card input[type="color"] {
+            width: 28px; height: 28px; padding: 1px; border-radius: 6px;
+            border: 1px solid var(--border); cursor: pointer; background: var(--bg-card);
+        }
+        .task-card-fields { display: grid; grid-template-columns: 1fr 80px 55px 55px; gap: 6px; }
+        .task-card-fields input {
+            padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 12px; outline: none;
+        }
+        .task-card-fields input:focus { border-color: var(--accent-blue); }
+        .task-card-fields input::placeholder { color: var(--text-muted); }
+
+        .btn-del {
+            width: 26px; height: 26px; border: none; border-radius: 6px;
+            background: rgba(244,63,94,0.1); color: var(--accent-rose);
+            cursor: pointer; font-size: 12px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-del:hover { background: var(--accent-rose); color: white; }
+
+        .btn-add {
+            width: 100%; padding: 10px; border: 2px dashed var(--border);
+            border-radius: 10px; background: transparent; color: var(--text-muted);
+            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; margin-top: 6px;
+        }
+        .btn-add:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        .btn-generate {
+            width: 100%; padding: 13px; border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white; font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.3); transition: all 0.2s;
+        }
+        .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(59,130,246,0.4); }
+
+        .btn-clear {
+            width: 100%; padding: 10px; margin-top: 8px;
+            border: 1px solid var(--border); border-radius: 10px;
+            background: transparent; color: var(--text-muted);
+            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-clear:hover { border-color: var(--accent-rose); color: var(--accent-rose); }
+
+        /* ─── Preview Panel ─── */
+        .preview {
+            overflow: auto; padding: 32px;
+            background: var(--bg-primary);
+        }
+
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 60vh;
+            text-align: center; color: var(--text-muted);
+        }
+        .empty-state .icon { font-size: 64px; margin-bottom: 20px; opacity: 0.4; }
+        .empty-state h2 { font-size: 20px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
+        .empty-state p { font-size: 13px; max-width: 380px; line-height: 1.6; }
+
+        /* ─── Gantt Preview ─── */
+        .gantt-preview { display: none; }
+        .gantt-preview.visible { display: block; }
+
+        .gantt-header-block {
+            padding: 24px; margin-bottom: 24px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; backdrop-filter: blur(10px);
+        }
+        .gantt-header-block h2 {
+            font-size: 22px; font-weight: 800;
             background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .header .subtitle {
-            font-size: 12px; color: var(--text-muted); margin-top: 3px;
-            max-width: 600px; line-height: 1.4;
-        }
-        .header-badges { display: flex; gap: 12px; align-items: center; }
-        .badge {
-            padding: 10px 20px; border-radius: 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-            font-size: 13px; font-weight: 600;
-        }
-        .badge.primary { color: var(--accent-cyan); }
-        .badge.secondary { color: var(--accent-amber); }
-        .badge span { color: var(--text-muted); font-weight: 400; }
-
-        .delai-bar {
-            margin-top: 12px; padding: 14px 20px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 12px;
-            font-size: 13px; color: var(--text-secondary);
-            line-height: 1.5;
-        }
-        .delai-bar strong { color: var(--accent-blue); font-weight: 700; }
-
-        /* ─── Controls ─── */
-        .controls-bar {
-            position: relative; z-index: 10;
-            padding: 16px 48px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .progress-info { display: flex; gap: 20px; align-items: center; }
-        .progress-item {
-            display: flex; align-items: center; gap: 8px;
+        .gantt-header-block .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .gantt-header-block .delai {
+            margin-top: 12px; padding: 10px 16px; border-radius: 10px;
+            background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15);
             font-size: 12px; color: var(--text-secondary);
         }
-        .progress-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .zoom-controls {
-            display: flex; gap: 4px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px; padding: 4px;
+        .gantt-header-block .delai strong { color: var(--accent-blue); }
+        .gantt-header-block .badges { display: flex; gap: 10px; margin-top: 12px; }
+        .gantt-header-block .badge-item {
+            padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
         }
-        .zoom-btn {
-            width: 36px; height: 36px; border: none;
-            background: transparent; color: var(--text-secondary);
-            border-radius: 8px; cursor: pointer; font-size: 16px;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        .zoom-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
-        .zoom-btn.active { background: var(--accent-blue); color: white; }
+        .gantt-header-block .badge-item.b1 { color: var(--accent-cyan); }
+        .gantt-header-block .badge-item.b2 { color: var(--accent-amber); }
 
-        /* ─── Gantt Container ─── */
-        .gantt-container {
-            position: relative; z-index: 10;
-            padding: 0 48px 48px;
+        .gantt-chart-area {
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; overflow: hidden; backdrop-filter: blur(10px);
         }
-        .gantt-wrapper {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-        }
-        .gantt-table {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            min-width: 100%;
+        .gantt-grid {
+            display: grid; grid-template-columns: 260px 1fr;
         }
 
-        /* Left panel */
-        .task-panel { border-right: 1px solid var(--border); }
-        .task-panel-header {
-            height: 56px;
-            display: flex; align-items: center;
-            padding: 0 20px;
-            font-size: 11px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
+        .g-task-panel { border-right: 1px solid var(--border); }
+        .g-task-header {
+            height: 48px; display: flex; align-items: center; padding: 0 16px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);
         }
-        .task-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 0 20px;
-            height: 54px;
-            border-bottom: 1px solid rgba(42, 53, 80, 0.3);
-            transition: background 0.2s;
+        .g-task-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 16px; height: 46px;
+            border-bottom: 1px solid rgba(42,53,80,0.25);
         }
-        .task-item:hover { background: var(--bg-hover); }
-        .task-item:last-child { border-bottom: none; }
-        .task-color { width: 4px; height: 30px; border-radius: 2px; flex-shrink: 0; }
-        .task-info { flex: 1; min-width: 0; }
-        .task-name {
-            font-size: 12.5px; font-weight: 600;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .task-duration {
-            font-size: 11px; color: var(--text-muted); margin-top: 2px;
-            font-weight: 500;
-        }
-        .task-start-badge {
-            font-size: 10px; font-weight: 600;
-            padding: 3px 8px; border-radius: 6px;
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--text-muted); flex-shrink: 0;
-            white-space: nowrap;
-        }
+        .g-task-row:last-child { border-bottom: none; }
+        .g-task-dot { width: 4px; height: 24px; border-radius: 2px; flex-shrink: 0; }
+        .g-task-info { flex: 1; min-width: 0; }
+        .g-task-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .g-task-dur { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
 
-        /* Right panel */
-        .timeline-panel { overflow-x: auto; position: relative; }
-        .timeline-panel::-webkit-scrollbar { height: 8px; }
-        .timeline-panel::-webkit-scrollbar-track { background: transparent; }
-        .timeline-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .timeline-scroll { min-width: 100%; position: relative; }
-        .timeline-header {
-            height: 56px;
-            display: flex;
-            border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
-            position: sticky; top: 0; z-index: 2;
+        .g-timeline { overflow-x: auto; }
+        .g-timeline::-webkit-scrollbar { height: 6px; }
+        .g-timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .g-timeline-scroll { position: relative; }
+        .g-timeline-header {
+            height: 48px; display: flex;
+            border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);
         }
-        .timeline-month {
-            flex: 0 0 auto;
-            display: flex; flex-direction: column;
+        .g-month {
+            flex: 0 0 auto; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 700;
-            color: var(--text-muted);
-            border-right: 1px solid rgba(42, 53, 80, 0.3);
+            font-size: 13px; font-weight: 700; color: var(--text-muted);
+            border-right: 1px solid rgba(42,53,80,0.25);
         }
-        .timeline-month .month-sub {
-            font-size: 9px; font-weight: 500;
-            color: var(--text-muted); opacity: 0.6;
-            margin-top: 2px; text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .g-month .msub { font-size: 8px; font-weight: 500; opacity: 0.6; margin-top: 1px; text-transform: uppercase; }
+        .g-month.first { color: var(--accent-rose); background: rgba(244,63,94,0.06); }
+        .g-month.last { color: var(--accent-emerald); background: rgba(16,185,129,0.06); }
+
+        .g-bar-row {
+            height: 46px; position: relative;
+            border-bottom: 1px solid rgba(42,53,80,0.2);
         }
-        .timeline-month.ods {
-            color: var(--accent-rose);
-            background: rgba(244, 63, 94, 0.08);
-        }
-        .timeline-month.reception {
-            color: var(--accent-emerald);
-            background: rgba(16, 185, 129, 0.08);
+        .g-bar-row:last-child { border-bottom: none; }
+        .g-gridline {
+            position: absolute; top: 0; bottom: 0; width: 1px;
+            background: rgba(42,53,80,0.15); pointer-events: none;
         }
 
-        .gantt-row {
-            height: 54px;
-            position: relative;
-            border-bottom: 1px solid rgba(42, 53, 80, 0.3);
-        }
-        .gantt-row:last-child { border-bottom: none; }
-        .gantt-row:hover { background: rgba(59, 130, 246, 0.03); }
-
-        .grid-line {
-            position: absolute; top: 0; bottom: 0;
-            width: 1px; background: rgba(42, 53, 80, 0.15);
-            pointer-events: none;
-        }
-        .grid-line.major { background: rgba(42, 53, 80, 0.35); }
-
-        .gantt-bar {
-            position: absolute;
-            top: 50%; transform: translateY(-50%);
-            height: 30px; border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex; align-items: center;
-            padding: 0 10px;
-            font-size: 11px; font-weight: 600;
-            color: white;
+        .g-bar {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            height: 28px; border-radius: 7px; cursor: default;
+            display: flex; align-items: center; padding: 0 8px;
+            font-size: 10px; font-weight: 600; color: white;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: barIn 0.4s ease-out forwards;
         }
-        .gantt-bar::before {
-            content: '';
-            position: absolute; inset: 0;
-            border-radius: inherit;
+        .g-bar::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
             background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 50%);
             pointer-events: none;
         }
-        .gantt-bar:hover {
-            transform: translateY(-50%) scaleY(1.15);
-            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-        }
+        @keyframes barIn { from { opacity:0; transform: translateY(-50%) scaleX(0); transform-origin: left; } to { opacity:1; transform: translateY(-50%) scaleX(1); } }
 
-        /* Milestone diamond */
-        .gantt-bar.milestone {
-            width: 28px !important; height: 28px;
-            border-radius: 6px;
-            transform: translateY(-50%) rotate(45deg);
-            padding: 0;
+        .g-bar.milestone {
+            width: 24px !important; height: 24px; border-radius: 5px;
+            transform: translateY(-50%) rotate(45deg); padding: 0;
             display: flex; align-items: center; justify-content: center;
         }
-        .gantt-bar.milestone:hover {
-            transform: translateY(-50%) rotate(45deg) scale(1.2);
-        }
-        .gantt-bar.milestone .milestone-inner {
-            transform: rotate(-45deg); font-size: 10px;
-        }
-
-        /* Duration label on bar */
-        .bar-duration {
-            margin-left: auto;
-            font-size: 10px;
-            font-weight: 500;
-            opacity: 0.85;
-            padding-left: 6px;
-        }
-
-        /* Markers */
-        .marker {
-            position: absolute; top: 0; bottom: 0;
-            width: 2px; z-index: 3; pointer-events: none;
-        }
-        .marker.ods { background: var(--accent-rose); }
-        .marker.reception { background: var(--accent-emerald); }
-        .marker-label {
-            position: absolute; top: 6px;
-            font-size: 9px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            white-space: nowrap;
-            padding: 2px 6px; border-radius: 4px;
-        }
-        .marker.ods .marker-label {
-            color: var(--accent-rose);
-            background: rgba(244, 63, 94, 0.15);
-            left: 6px;
-        }
-        .marker.reception .marker-label {
-            color: var(--accent-emerald);
-            background: rgba(16, 185, 129, 0.15);
-            right: 6px;
-        }
-
-        /* Tooltip */
-        .tooltip {
-            position: fixed; z-index: 1000;
-            padding: 16px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-            opacity: 0; transform: translateY(8px);
-            transition: all 0.2s ease;
-            max-width: 360px;
-        }
-        .tooltip.visible { opacity: 1; transform: translateY(0); }
-        .tooltip-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-        .tooltip-detail { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-        .tooltip-meta {
-            display: flex; gap: 16px; margin-top: 10px;
-            padding-top: 10px; border-top: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-        .tooltip-meta-item { font-size: 11px; }
-        .tooltip-meta-item span { color: var(--text-muted); }
+        .g-bar.milestone span { transform: rotate(-45deg); font-size: 9px; }
 
         /* Legend */
-        .legend {
-            position: relative; z-index: 10;
-            padding: 0 48px 32px;
+        .g-legend {
+            margin-top: 16px; padding: 14px 18px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 12px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
         }
-        .legend-container {
-            padding: 18px 24px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            display: flex; flex-wrap: wrap;
-            gap: 14px; align-items: center;
-        }
-        .legend-title {
-            font-size: 11px; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-muted); margin-right: 8px;
-        }
-        .legend-item {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 11px; color: var(--text-secondary);
-        }
-        .legend-swatch { width: 16px; height: 8px; border-radius: 3px; }
+        .g-legend-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-right: 6px; }
+        .g-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-secondary); }
+        .g-legend-swatch { width: 12px; height: 6px; border-radius: 3px; }
 
-        /* Animations */
-        @keyframes barSlide {
-            from { opacity: 0; transform: translateY(-50%) scaleX(0); transform-origin: left center; }
-            to { opacity: 1; transform: translateY(-50%) scaleX(1); }
-        }
-        .gantt-bar.animate { animation: barSlide 0.5s ease-out forwards; }
-
-        /* ─── Section Divider ─── */
-        .section-divider {
-            position: relative; z-index: 10;
-            padding: 60px 48px 20px;
-            text-align: center;
-        }
-        .divider-line {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent-purple), var(--accent-cyan), transparent);
-            margin-bottom: 32px;
-        }
-        .section-divider h2 {
-            font-size: 28px; font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-amber), var(--accent-orange));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 6px;
-        }
-        .section-divider .section-sub {
-            font-size: 13px; color: var(--text-muted);
-        }
-        .version-badge {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 12px; font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .version-badge.v1 {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: var(--accent-blue);
-        }
-        .version-badge.v2 {
-            background: rgba(249, 115, 22, 0.15);
-            border: 1px solid rgba(249, 115, 22, 0.3);
-            color: var(--accent-orange);
-        }
-        .comparison-table {
-            position: relative; z-index: 10;
-            padding: 0 48px 24px;
-        }
-        .comparison-table table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-        }
-        .comparison-table th {
-            padding: 12px 16px;
-            font-size: 11px; font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            background: rgba(0, 0, 0, 0.25);
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        .comparison-table th.col-24 { color: var(--accent-blue); }
-        .comparison-table th.col-16 { color: var(--accent-orange); }
-        .comparison-table th.col-arrow { text-align: center; width: 40px; }
-        .comparison-table td {
-            padding: 10px 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid rgba(42, 53, 80, 0.25);
-        }
-        .comparison-table tr:last-child td { border-bottom: none; }
-        .comparison-table tr:hover td { background: rgba(59, 130, 246, 0.03); }
-        .comparison-table td.task-col { font-weight: 600; color: var(--text-primary); }
-        .comparison-table td.arrow-col { text-align: center; color: var(--accent-amber); font-size: 14px; }
-        .comparison-table td.val-24 { color: var(--accent-blue); font-weight: 600; }
-        .comparison-table td.val-16 { color: var(--accent-orange); font-weight: 600; }
-
-        /* ─── Editor Panel ─── */
-        .editor-toggle {
-            position: fixed; bottom: 32px; right: 32px;
-            z-index: 100;
-            width: 56px; height: 56px;
-            border-radius: 16px; border: none;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            color: white; font-size: 22px;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
-            transition: all 0.3s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .editor-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.5);
-        }
-        .editor-toggle.active {
-            background: linear-gradient(135deg, var(--accent-rose), var(--accent-orange));
-            border-radius: 14px;
-        }
-
-        .editor-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 90;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .editor-overlay.visible { opacity: 1; pointer-events: all; }
-
-        .editor-panel {
-            position: fixed; top: 0; right: -620px;
-            width: 600px; height: 100vh;
-            z-index: 95;
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border);
-            box-shadow: -10px 0 60px rgba(0, 0, 0, 0.5);
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; flex-direction: column;
-            overflow: hidden;
-        }
-        .editor-panel.open { right: 0; }
-
-        .editor-header {
-            padding: 24px; flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
-        }
-        .editor-header h3 {
-            font-size: 18px; font-weight: 800;
-            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
-        }
-        .editor-header p { font-size: 12px; color: var(--text-muted); }
-
-        .editor-body {
-            flex: 1; overflow-y: auto;
-            padding: 24px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
-        }
-        .editor-body::-webkit-scrollbar { width: 6px; }
-        .editor-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-        .editor-section {
-            margin-bottom: 28px;
-        }
-        .editor-section-title {
-            font-size: 11px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .editor-section-title::after {
-            content: ''; flex: 1; height: 1px;
-            background: var(--border);
-        }
-
-        .editor-field { margin-bottom: 14px; }
-        .editor-field label {
-            display: block; font-size: 11px; font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-        .editor-field input, .editor-field select, .editor-field textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            transition: border-color 0.2s;
-            outline: none;
-        }
-        .editor-field input:focus, .editor-field select:focus, .editor-field textarea:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-        .editor-field textarea { resize: vertical; min-height: 60px; }
-
-        .version-tabs {
-            display: flex; gap: 4px;
-            background: var(--bg-primary);
-            border-radius: 12px; padding: 4px;
-            margin-bottom: 20px;
-        }
-        .version-tab {
-            flex: 1; padding: 10px;
-            border: none; border-radius: 8px;
-            background: transparent;
-            color: var(--text-muted);
-            font-family: 'Inter', sans-serif;
-            font-size: 12px; font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .version-tab.active {
-            background: var(--accent-blue);
-            color: white;
-        }
-        .version-tab:last-child.active {
-            background: var(--accent-orange);
-        }
-
-        .task-editor-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 4px;
-        }
-        .task-editor-table th {
-            font-size: 10px; font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            padding: 6px 4px;
-            text-align: left;
-        }
-        .task-editor-table td {
-            padding: 2px 4px;
-        }
-        .task-editor-table input {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .task-editor-table input:focus {
-            border-color: var(--accent-blue);
-        }
-        .task-editor-table input[type="color"] {
-            width: 32px; height: 32px;
-            padding: 2px; cursor: pointer;
-            border-radius: 6px;
-        }
-        .task-editor-table input[type="number"] { width: 64px; }
-
-        .btn-delete-task {
-            width: 28px; height: 28px;
-            border: none; border-radius: 6px;
-            background: rgba(244, 63, 94, 0.1);
-            color: var(--accent-rose);
-            cursor: pointer; font-size: 14px;
-            transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .btn-delete-task:hover {
-            background: var(--accent-rose);
-            color: white;
-        }
-
-        .btn-add-task {
-            width: 100%; padding: 10px;
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            background: transparent;
-            color: var(--text-muted);
-            font-family: 'Inter', sans-serif;
-            font-size: 12px; font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 8px;
-        }
-        .btn-add-task:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-            background: rgba(59, 130, 246, 0.05);
-        }
-
-        .editor-footer {
-            padding: 20px 24px; flex-shrink: 0;
-            border-top: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
-            display: flex; gap: 12px;
-        }
-        .btn-apply {
-            flex: 1; padding: 12px;
-            border: none; border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            color: white;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px; font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
-        }
-        .btn-apply:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
-        }
-        .btn-reset {
-            padding: 12px 20px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: transparent;
-            color: var(--text-secondary);
-            font-family: 'Inter', sans-serif;
-            font-size: 13px; font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-reset:hover { border-color: var(--accent-rose); color: var(--accent-rose); }
-
+        /* Toast */
         .toast {
-            position: fixed; bottom: 100px; left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            padding: 12px 24px;
-            border-radius: 12px;
-            background: var(--accent-emerald);
-            color: white;
-            font-size: 13px; font-weight: 600;
-            z-index: 200;
-            opacity: 0;
-            transition: all 0.3s;
-            pointer-events: none;
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+            padding: 12px 24px; border-radius: 12px; background: var(--accent-emerald);
+            color: white; font-size: 13px; font-weight: 600; z-index: 200;
+            opacity: 0; transition: all 0.3s; pointer-events: none;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        @media (max-width: 1024px) {
-            .header, .controls-bar, .gantt-container, .legend, .section-divider, .comparison-table { padding-left: 24px; padding-right: 24px; }
-            .gantt-table { grid-template-columns: 230px 1fr; }
-            .editor-panel { width: 100%; right: -100%; }
+        @media (max-width: 900px) {
+            .app-layout { grid-template-columns: 1fr; }
+            .editor { border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
+            .preview { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
-<div class="bg-effects">
-    <div class="orb"></div>
-    <div class="orb"></div>
-    <div class="orb"></div>
+<div class="bg-effects"><div class="orb"></div><div class="orb"></div></div>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <div class="topbar-icon">📊</div>
+        <h1>Créateur de Diagramme de Gantt</h1>
+    </div>
+    <span class="tag">Éditeur interactif</span>
 </div>
 
-<header class="header">
-    <div class="header-top">
-        <div class="header-left">
-            <div class="header-icon">🏗️</div>
-            <div>
-                <h1>PLANNING DE RÉALISATION</h1>
-                <p class="subtitle">Réalisation des travaux d'un pôle médical</p>
-            </div>
-        </div>
-        <div class="header-badges">
-            <div class="badge primary"><span>Délai :</span> 24 mois</div>
-            <div class="badge secondary"><span>Tâches :</span> 12</div>
-        </div>
-    </div>
-    <div class="delai-bar">
-        <strong>Délai d'exécution :</strong> à partir de l'ODS notifié au service co-contractant par le service contractant.
-    </div>
-</header>
-
-<!-- Editor Toggle Button -->
-<button class="editor-toggle" id="editorToggle" onclick="toggleEditor()" title="Modifier le planning">
-    ✏️
-</button>
-
-<!-- Editor Overlay -->
-<div class="editor-overlay" id="editorOverlay" onclick="toggleEditor()"></div>
-
-<!-- Editor Panel -->
-<div class="editor-panel" id="editorPanel">
-    <div class="editor-header">
-        <h3>✏️ Éditeur de Planning</h3>
-        <p>Modifiez les titres, les tâches et les dates en temps réel</p>
-    </div>
-
-    <div class="editor-body">
-        <!-- Version Selector -->
-        <div class="version-tabs">
-            <button class="version-tab active" onclick="switchEditorVersion('v1')">Version 1 — 24 mois</button>
-            <button class="version-tab" onclick="switchEditorVersion('v2')">Version 2 — 16 mois</button>
-        </div>
-
-        <!-- Titles Section -->
-        <div class="editor-section">
-            <div class="editor-section-title">Titres & En-tête</div>
-            <div class="editor-field">
+<div class="app-layout">
+    <!-- ═══ EDITOR ═══ -->
+    <div class="editor">
+        <div class="section">
+            <div class="section-title">Informations du projet</div>
+            <div class="field">
                 <label>Titre principal</label>
-                <input type="text" id="editTitle" value="PLANNING DE RÉALISATION">
+                <input type="text" id="inTitle" placeholder="Ex: PLANNING DE RÉALISATION">
             </div>
-            <div class="editor-field">
+            <div class="field">
                 <label>Sous-titre</label>
-                <input type="text" id="editSubtitle" value="Réalisation des travaux d'un pôle médical">
+                <input type="text" id="inSubtitle" placeholder="Ex: Réalisation des travaux d'un pôle médical">
             </div>
-            <div class="editor-field">
+            <div class="field">
                 <label>Délai d'exécution (texte)</label>
-                <textarea id="editDelai">à partir de l'ODS notifié au service co-contractant par le service contractant.</textarea>
+                <textarea id="inDelai" placeholder="Ex: à partir de l'ODS notifié au service co-contractant..."></textarea>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label>Durée totale (mois)</label>
+                    <input type="number" id="inMonths" value="24" min="1" max="120">
+                </div>
+                <div class="field">
+                    <label>Largeur mois (px)</label>
+                    <input type="number" id="inMonthWidth" value="60" min="30" max="150">
+                </div>
             </div>
         </div>
 
-        <!-- Tasks Section -->
-        <div class="editor-section">
-            <div class="editor-section-title" id="editorTasksTitle">Tâches — Version 24 mois</div>
-            <div style="overflow-x:auto">
-                <table class="task-editor-table" id="taskEditorTable">
-                    <thead>
-                        <tr>
-                            <th>Couleur</th>
-                            <th>Nom de la tâche</th>
-                            <th>Durée</th>
-                            <th>Début</th>
-                            <th>Fin</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="taskEditorBody"></tbody>
-                </table>
-            </div>
-            <button class="btn-add-task" onclick="addEditorTask()">+ Ajouter une tâche</button>
+        <div class="section">
+            <div class="section-title">Tâches</div>
+            <div class="task-list" id="taskList"></div>
+            <button class="btn-add" onclick="addTask()">+ Ajouter une tâche</button>
+        </div>
+
+        <div class="section">
+            <button class="btn-generate" onclick="generateChart()">✦ Générer le diagramme</button>
+            <button class="btn-clear" onclick="clearAll()">Tout effacer</button>
         </div>
     </div>
 
-    <div class="editor-footer">
-        <button class="btn-reset" onclick="resetEditor()">Réinitialiser</button>
-        <button class="btn-apply" onclick="applyEditorChanges()">✓ Appliquer les modifications</button>
-    </div>
-</div>
-
-<!-- Toast notification -->
-<div class="toast" id="toast">✓ Modifications appliquées avec succès !</div>
-
-<div class="controls-bar">
-    <div class="progress-info">
-        <div class="progress-item">
-            <div class="progress-dot" style="background: var(--accent-rose)"></div>
-            ODS (Ordre de Service)
+    <!-- ═══ PREVIEW ═══ -->
+    <div class="preview">
+        <div class="empty-state" id="emptyState">
+            <div class="icon">📊</div>
+            <h2>Votre diagramme apparaîtra ici</h2>
+            <p>Remplissez les informations du projet et ajoutez vos tâches dans le panneau de gauche, puis cliquez sur <strong>« Générer le diagramme »</strong>.</p>
         </div>
-        <div class="progress-item">
-            <div class="progress-dot" style="background: var(--accent-emerald)"></div>
-            Réception provisoire — Mois 24
-        </div>
-    </div>
-    <div class="zoom-controls">
-        <button class="zoom-btn" onclick="setZoom(0.6)" title="Zoom arrière">−</button>
-        <button class="zoom-btn active" onclick="setZoom(1)" title="Réinitialiser">⊙</button>
-        <button class="zoom-btn" onclick="setZoom(1.5)" title="Zoom avant">+</button>
+        <div class="gantt-preview" id="ganttPreview"></div>
     </div>
 </div>
 
-<div class="gantt-container">
-    <div class="gantt-wrapper">
-        <div class="gantt-table">
-            <div class="task-panel" id="taskPanel"></div>
-            <div class="timeline-panel" id="timelinePanel">
-                <div class="timeline-scroll" id="timelineScroll"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="legend" id="legend"></div>
-
-<!-- ════════════════════════════════════════════════════════ -->
-<!-- ═══════════  VERSION 2 — PLANNING 16 MOIS  ═══════════ -->
-<!-- ════════════════════════════════════════════════════════ -->
-
-<div class="section-divider">
-    <div class="divider-line"></div>
-    <h2>VERSION 2 — PLANNING RECALCULÉ SUR 16 MOIS</h2>
-    <p class="section-sub">Facteur de compression ×0.667 appliqué à toutes les durées et dates de début</p>
-    <span class="version-badge v2">Délai optimisé : 16 mois</span>
-</div>
-
-<!-- Comparison Table -->
-<div class="comparison-table">
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Tâche</th>
-                <th class="col-24">Version 24 mois</th>
-                <th class="col-arrow"></th>
-                <th class="col-16">Version 16 mois</th>
-                <th class="col-16">Début</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>1</td><td class="task-col">Installation de chantier</td><td class="val-24">15 jours</td><td class="arrow-col">→</td><td class="val-16">10 jours</td><td>M0</td></tr>
-            <tr><td>2</td><td class="task-col">Terrassements / Excavations</td><td class="val-24">3 mois</td><td class="arrow-col">→</td><td class="val-16">2 mois</td><td>10J</td></tr>
-            <tr><td>3</td><td class="task-col">Infrastructure</td><td class="val-24">7 mois</td><td class="arrow-col">→</td><td class="val-16">5 mois</td><td>M2</td></tr>
-            <tr><td>4</td><td class="task-col">Superstructure</td><td class="val-24">12 mois</td><td class="arrow-col">→</td><td class="val-16">8 mois</td><td>M5</td></tr>
-            <tr><td>5</td><td class="task-col">Maçonnerie et enduits</td><td class="val-24">12 mois</td><td class="arrow-col">→</td><td class="val-16">8 mois</td><td>M5</td></tr>
-            <tr><td>6</td><td class="task-col">VRD</td><td class="val-24">17 mois</td><td class="arrow-col">→</td><td class="val-16">11 mois</td><td>M2½</td></tr>
-            <tr><td>7</td><td class="task-col">Électricité / Plomberie</td><td class="val-24">17 mois</td><td class="arrow-col">→</td><td class="val-16">11 mois</td><td>M3</td></tr>
-            <tr><td>8</td><td class="task-col">Clim / Chauffage central</td><td class="val-24">16 mois</td><td class="arrow-col">→</td><td class="val-16">11 mois</td><td>M3</td></tr>
-            <tr><td>9</td><td class="task-col">Finition sol / Peinture</td><td class="val-24">13 mois</td><td class="arrow-col">→</td><td class="val-16">9 mois</td><td>M6</td></tr>
-            <tr><td>10</td><td class="task-col">Nettoyage</td><td class="val-24">2 mois</td><td class="arrow-col">→</td><td class="val-16">1 mois ½</td><td>M14</td></tr>
-            <tr><td>11</td><td class="task-col">Essais + Formation</td><td class="val-24">2 mois ½</td><td class="arrow-col">→</td><td class="val-16">1 mois ½</td><td>M14</td></tr>
-            <tr><td>12</td><td class="task-col">◆ Réception provisoire</td><td class="val-24">Mois 24</td><td class="arrow-col">→</td><td class="val-16">Mois 16</td><td>M16</td></tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- V2 Controls -->
-<div class="controls-bar">
-    <div class="progress-info">
-        <div class="progress-item">
-            <div class="progress-dot" style="background: var(--accent-rose)"></div>
-            ODS (Ordre de Service)
-        </div>
-        <div class="progress-item">
-            <div class="progress-dot" style="background: var(--accent-emerald)"></div>
-            Réception provisoire — Mois 16
-        </div>
-    </div>
-    <div class="zoom-controls">
-        <button class="zoom-btn" onclick="setZoomV2(0.6)" title="Zoom arrière">−</button>
-        <button class="zoom-btn active" id="zoomV2Default" onclick="setZoomV2(1)" title="Réinitialiser">⊙</button>
-        <button class="zoom-btn" onclick="setZoomV2(1.5)" title="Zoom avant">+</button>
-    </div>
-</div>
-
-<!-- V2 Gantt -->
-<div class="gantt-container">
-    <div class="gantt-wrapper">
-        <div class="gantt-table">
-            <div class="task-panel" id="taskPanelV2"></div>
-            <div class="timeline-panel" id="timelinePanelV2">
-                <div class="timeline-scroll" id="timelineScrollV2"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="legend" id="legendV2"></div>
-
-<!-- Shared Tooltip -->
-<div class="tooltip" id="tooltip">
-    <div class="tooltip-title" id="tooltipTitle"></div>
-    <div class="tooltip-detail" id="tooltipDetail"></div>
-    <div class="tooltip-meta" id="tooltipMeta"></div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// ─── DONNÉES EXACTES DE L'IMAGE ───
-// Timeline 0 à 24 mois
-const TOTAL_MONTHS = 25; // 0..24 inclus
-let monthWidth = 60;
+let tasks = [];
+let taskIdCounter = 0;
 
-const TASKS = [
-    {
-        name: "Installation de chantier",
-        duration: "15 jours",
-        startMonth: 0,
-        endMonth: 0.5,
-        startLabel: "ODS",
-        color: "#ef4444",
-        gradient: "linear-gradient(135deg, #ef4444, #dc2626)",
-        detail: "Mise en place base vie, clôtures, branchements provisoires, signalisation chantier"
-    },
-    {
-        name: "Terrassements / Excavations",
-        duration: "3 mois",
-        startMonth: 0.5,
-        endMonth: 3.5,
-        startLabel: "15J",
-        color: "#b91c1c",
-        gradient: "linear-gradient(135deg, #c53030, #9b2c2c)",
-        detail: "Fouilles en pleine masse, excavations, évacuation des déblais, nivellement du terrain"
-    },
-    {
-        name: "Infrastructure",
-        duration: "7 mois",
-        startMonth: 3,
-        endMonth: 10,
-        startLabel: "3ème mois",
-        color: "#b45309",
-        gradient: "linear-gradient(135deg, #d97706, #b45309)",
-        detail: "Fondations, semelles, longrines, dallage, murs de soubassement, cuvelage"
-    },
-    {
-        name: "Superstructure",
-        duration: "12 mois",
-        startMonth: 7,
-        endMonth: 19,
-        startLabel: "7ème mois",
-        color: "#2563eb",
-        gradient: "linear-gradient(135deg, #3b82f6, #2563eb)",
-        detail: "Poteaux, poutres, planchers, voiles, escaliers, acrotères, structure béton armé"
-    },
-    {
-        name: "Maçonnerie et enduits",
-        duration: "12 mois",
-        startMonth: 7,
-        endMonth: 19,
-        startLabel: "7ème mois",
-        color: "#16a34a",
-        gradient: "linear-gradient(135deg, #22c55e, #16a34a)",
-        detail: "Murs en briques/parpaings, cloisons de distribution, enduits intérieurs et extérieurs"
-    },
-    {
-        name: "VRD",
-        duration: "17 mois",
-        startMonth: 3.5,
-        endMonth: 20.5,
-        startLabel: "3ème mois et demi",
-        color: "#15803d",
-        gradient: "linear-gradient(135deg, #16a34a, #15803d)",
-        detail: "Voiries et réseaux divers, assainissement, AEP, espaces extérieurs, trottoirs, parking"
-    },
-    {
-        name: "Électricité / Plomberie",
-        duration: "17 mois",
-        startMonth: 4,
-        endMonth: 21,
-        startLabel: "4ème mois",
-        color: "#0ea5e9",
-        gradient: "linear-gradient(135deg, #38bdf8, #0ea5e9)",
-        detail: "Réseaux électriques courants forts et faibles, plomberie sanitaire, alimentation en eau"
-    },
-    {
-        name: "Climatisation / Chauffage central",
-        duration: "16 mois",
-        startMonth: 4,
-        endMonth: 20,
-        startLabel: "4ème mois",
-        color: "#7c3aed",
-        gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-        detail: "Climatisation centrale, chauffage central, ventilation mécanique, gaines techniques"
-    },
-    {
-        name: "Finition sol / Peinture",
-        duration: "13 mois",
-        startMonth: 9,
-        endMonth: 22,
-        startLabel: "9ème mois",
-        color: "#c2410c",
-        gradient: "linear-gradient(135deg, #ea580c, #c2410c)",
-        detail: "Revêtements de sol (carrelage, PVC), peinture intérieure/extérieure, faux-plafonds, menuiseries"
-    },
-    {
-        name: "Nettoyage",
-        duration: "2 mois",
-        startMonth: 21,
-        endMonth: 23,
-        startLabel: "21ème mois",
-        color: "#eab308",
-        gradient: "linear-gradient(135deg, #facc15, #eab308)",
-        detail: "Nettoyage général de fin de chantier, évacuation gravats résiduels, nettoyage vitres et sols"
-    },
-    {
-        name: "Essais + Formation + Pré-exploitation",
-        duration: "2 mois et demi",
-        startMonth: 21,
-        endMonth: 23.5,
-        startLabel: "21ème mois",
-        color: "#14b8a6",
-        gradient: "linear-gradient(135deg, #2dd4bf, #14b8a6)",
-        detail: "Essais techniques des installations, formation du personnel, mise en route progressive des équipements"
-    },
-    {
-        name: "Réception provisoire",
-        duration: "24ème mois",
-        startMonth: 24,
-        endMonth: 24,
-        startLabel: "24ème mois",
-        color: "#10b981",
-        gradient: "linear-gradient(135deg, #34d399, #10b981)",
-        detail: "Réception provisoire des travaux, procès-verbal de réception, levée des réserves éventuelles",
-        isMilestone: true
-    }
+const COLORS = [
+    '#ef4444','#b91c1c','#b45309','#2563eb','#16a34a','#15803d',
+    '#0ea5e9','#7c3aed','#c2410c','#eab308','#14b8a6','#6366f1',
+    '#ec4899','#8b5cf6','#f97316','#06b6d4','#84cc16','#f43f5e'
 ];
 
-function init() {
-    renderTaskPanel();
-    renderTimeline();
-    renderLegend();
+function addTask(name='', duration='', start='', end='', color='') {
+    const id = taskIdCounter++;
+    if (!color) color = COLORS[tasks.length % COLORS.length];
+    tasks.push({ id, name, duration, start: parseFloat(start)||0, end: parseFloat(end)||0, color });
+    renderTaskList();
 }
 
-function renderTaskPanel() {
-    const panel = document.getElementById('taskPanel');
-    let html = '<div class="task-panel-header">Désignation des tâches</div>';
-
-    TASKS.forEach((task, i) => {
-        html += `
-            <div class="task-item" id="task-label-${i}">
-                <div class="task-color" style="background:${task.color}"></div>
-                <div class="task-info">
-                    <div class="task-name">${task.name}</div>
-                    <div class="task-duration">${task.isMilestone ? 'Jalon' : task.duration}</div>
-                </div>
-                <div class="task-start-badge">${task.startLabel}</div>
-            </div>
-        `;
-    });
-
-    panel.innerHTML = html;
+function removeTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    renderTaskList();
 }
 
-function renderTimeline() {
-    const scroll = document.getElementById('timelineScroll');
-    scroll.innerHTML = '';
-    scroll.style.width = (TOTAL_MONTHS * monthWidth) + 'px';
-
-    // Header 0..24
-    const header = document.createElement('div');
-    header.className = 'timeline-header';
-
-    for (let m = 0; m < TOTAL_MONTHS; m++) {
-        const div = document.createElement('div');
-        div.className = 'timeline-month';
-        div.style.width = monthWidth + 'px';
-
-        if (m === 0) {
-            div.classList.add('ods');
-            div.innerHTML = `<span>ODS</span><span class="month-sub">Mois 0</span>`;
-        } else if (m === 24) {
-            div.classList.add('reception');
-            div.innerHTML = `<span>${m}</span><span class="month-sub">Réc. Prov.</span>`;
-        } else {
-            let sub = '';
-            if (m % 6 === 0) sub = `<span class="month-sub">Mois ${m}</span>`;
-            div.innerHTML = `<span>${m}</span>${sub}`;
-        }
-
-        header.appendChild(div);
-    }
-    scroll.appendChild(header);
-
-    // Rows
-    const rowsContainer = document.createElement('div');
-    rowsContainer.style.position = 'relative';
-
-    TASKS.forEach((task, i) => {
-        const row = document.createElement('div');
-        row.className = 'gantt-row';
-
-        // Grid lines
-        for (let m = 0; m < TOTAL_MONTHS; m++) {
-            const line = document.createElement('div');
-            line.className = 'grid-line' + (m % 6 === 0 ? ' major' : '');
-            line.style.left = (m * monthWidth) + 'px';
-            row.appendChild(line);
-        }
-
-        // ODS marker on first row
-        if (i === 0) {
-            const marker = document.createElement('div');
-            marker.className = 'marker ods';
-            marker.style.left = '0px';
-            marker.innerHTML = '<div class="marker-label">ODS</div>';
-            row.appendChild(marker);
-        }
-
-        // Reception marker on last row
-        if (i === TASKS.length - 1) {
-            const marker = document.createElement('div');
-            marker.className = 'marker reception';
-            marker.style.left = (24 * monthWidth) + 'px';
-            marker.innerHTML = '<div class="marker-label">Réception</div>';
-            row.appendChild(marker);
-        }
-
-        // Bar
-        if (task.isMilestone) {
-            const bar = document.createElement('div');
-            bar.className = 'gantt-bar milestone animate';
-            bar.style.left = (task.startMonth * monthWidth - 14) + 'px';
-            bar.style.background = task.gradient;
-            bar.style.animationDelay = (i * 0.06) + 's';
-            bar.innerHTML = '<span class="milestone-inner">◆</span>';
-            bar.onmouseenter = (e) => showTooltip(e, task);
-            bar.onmouseleave = hideTooltip;
-            bar.onmousemove = moveTooltip;
-            row.appendChild(bar);
-        } else {
-            const bar = document.createElement('div');
-            bar.className = 'gantt-bar animate';
-            const leftPx = task.startMonth * monthWidth + 2;
-            const widthPx = Math.max((task.endMonth - task.startMonth) * monthWidth - 4, 20);
-            bar.style.left = leftPx + 'px';
-            bar.style.width = widthPx + 'px';
-            bar.style.background = task.gradient;
-            bar.style.animationDelay = (i * 0.06) + 's';
-
-            // Label
-            let labelText = '';
-            if (widthPx > 140) {
-                labelText = `${task.name} <span class="bar-duration">: ${task.duration}</span>`;
-            } else if (widthPx > 70) {
-                labelText = task.duration;
-            }
-            bar.innerHTML = labelText;
-
-            bar.onmouseenter = (e) => showTooltip(e, task);
-            bar.onmouseleave = hideTooltip;
-            bar.onmousemove = moveTooltip;
-            row.appendChild(bar);
-        }
-
-        rowsContainer.appendChild(row);
-    });
-
-    scroll.appendChild(rowsContainer);
-
-    // Animate
-    setTimeout(() => {
-        document.querySelectorAll('.gantt-bar.animate').forEach((bar, i) => {
-            bar.style.opacity = '0';
-            setTimeout(() => { bar.style.opacity = '1'; }, i * 60);
-        });
-    }, 100);
-}
-
-function setZoom(level) {
-    monthWidth = 60 * level;
-    document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
-    renderTimeline();
-}
-
-function showTooltip(e, task) {
-    const tt = document.getElementById('tooltip');
-    document.getElementById('tooltipTitle').textContent = task.name;
-    document.getElementById('tooltipTitle').style.color = task.color;
-    document.getElementById('tooltipDetail').textContent = task.detail;
-
-    let meta = '';
-    if (task.isMilestone) {
-        meta = `<div class="tooltip-meta-item"><span>Jalon :</span> Mois 24</div>`;
-        meta += `<div class="tooltip-meta-item"><span>Type :</span> Réception provisoire</div>`;
-    } else {
-        meta += `<div class="tooltip-meta-item"><span>Durée :</span> ${task.duration}</div>`;
-        meta += `<div class="tooltip-meta-item"><span>Début :</span> ${task.startLabel}</div>`;
-        meta += `<div class="tooltip-meta-item"><span>Fin :</span> Mois ${task.endMonth}</div>`;
-    }
-    document.getElementById('tooltipMeta').innerHTML = meta;
-    tt.classList.add('visible');
-    moveTooltip(e);
-}
-
-function moveTooltip(e) {
-    const tt = document.getElementById('tooltip');
-    tt.style.left = Math.min(e.clientX + 16, window.innerWidth - 380) + 'px';
-    tt.style.top = Math.min(e.clientY + 16, window.innerHeight - 160) + 'px';
-}
-
-function hideTooltip() {
-    document.getElementById('tooltip').classList.remove('visible');
-}
-
-function renderLegend() {
-    const container = document.getElementById('legend');
-    let html = '<div class="legend-container"><span class="legend-title">Légende</span>';
-    TASKS.forEach(t => {
-        html += `<div class="legend-item"><div class="legend-swatch" style="background:${t.gradient}"></div>${t.name}${t.isMilestone ? '' : ' : ' + t.duration}</div>`;
-    });
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-document.addEventListener('DOMContentLoaded', init);
-
-// ══════════════════════════════════════════════════════
-// ═══════  VERSION 2 — PLANNING 16 MOIS  ═════════════
-// ══════════════════════════════════════════════════════
-
-const TOTAL_MONTHS_V2 = 17; // 0..16 inclus
-let monthWidthV2 = 75;
-
-const TASKS_V2 = [
-    {
-        name: "Installation de chantier",
-        duration: "10 jours",
-        startMonth: 0,
-        endMonth: 0.33,
-        startLabel: "ODS",
-        color: "#ef4444",
-        gradient: "linear-gradient(135deg, #ef4444, #dc2626)",
-        detail: "Mise en place base vie, clôtures, branchements provisoires, signalisation chantier"
-    },
-    {
-        name: "Terrassements / Excavations",
-        duration: "2 mois",
-        startMonth: 0.33,
-        endMonth: 2.33,
-        startLabel: "10J",
-        color: "#b91c1c",
-        gradient: "linear-gradient(135deg, #c53030, #9b2c2c)",
-        detail: "Fouilles en pleine masse, excavations, évacuation des déblais, nivellement du terrain"
-    },
-    {
-        name: "Infrastructure",
-        duration: "5 mois",
-        startMonth: 2,
-        endMonth: 7,
-        startLabel: "2ème mois",
-        color: "#b45309",
-        gradient: "linear-gradient(135deg, #d97706, #b45309)",
-        detail: "Fondations, semelles, longrines, dallage, murs de soubassement, cuvelage"
-    },
-    {
-        name: "Superstructure",
-        duration: "8 mois",
-        startMonth: 5,
-        endMonth: 13,
-        startLabel: "5ème mois",
-        color: "#2563eb",
-        gradient: "linear-gradient(135deg, #3b82f6, #2563eb)",
-        detail: "Poteaux, poutres, planchers, voiles, escaliers, acrotères, structure béton armé"
-    },
-    {
-        name: "Maçonnerie et enduits",
-        duration: "8 mois",
-        startMonth: 5,
-        endMonth: 13,
-        startLabel: "5ème mois",
-        color: "#16a34a",
-        gradient: "linear-gradient(135deg, #22c55e, #16a34a)",
-        detail: "Murs en briques/parpaings, cloisons de distribution, enduits intérieurs et extérieurs"
-    },
-    {
-        name: "VRD",
-        duration: "11 mois",
-        startMonth: 2.5,
-        endMonth: 13.5,
-        startLabel: "2ème mois et demi",
-        color: "#15803d",
-        gradient: "linear-gradient(135deg, #16a34a, #15803d)",
-        detail: "Voiries et réseaux divers, assainissement, AEP, espaces extérieurs, trottoirs, parking"
-    },
-    {
-        name: "Électricité / Plomberie",
-        duration: "11 mois",
-        startMonth: 3,
-        endMonth: 14,
-        startLabel: "3ème mois",
-        color: "#0ea5e9",
-        gradient: "linear-gradient(135deg, #38bdf8, #0ea5e9)",
-        detail: "Réseaux électriques courants forts et faibles, plomberie sanitaire, alimentation en eau"
-    },
-    {
-        name: "Climatisation / Chauffage central",
-        duration: "11 mois",
-        startMonth: 3,
-        endMonth: 14,
-        startLabel: "3ème mois",
-        color: "#7c3aed",
-        gradient: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-        detail: "Climatisation centrale, chauffage central, ventilation mécanique, gaines techniques"
-    },
-    {
-        name: "Finition sol / Peinture",
-        duration: "9 mois",
-        startMonth: 6,
-        endMonth: 15,
-        startLabel: "6ème mois",
-        color: "#c2410c",
-        gradient: "linear-gradient(135deg, #ea580c, #c2410c)",
-        detail: "Revêtements de sol (carrelage, PVC), peinture intérieure/extérieure, faux-plafonds, menuiseries"
-    },
-    {
-        name: "Nettoyage",
-        duration: "1 mois et demi",
-        startMonth: 14,
-        endMonth: 15.5,
-        startLabel: "14ème mois",
-        color: "#eab308",
-        gradient: "linear-gradient(135deg, #facc15, #eab308)",
-        detail: "Nettoyage général de fin de chantier, évacuation gravats résiduels, nettoyage vitres et sols"
-    },
-    {
-        name: "Essais + Formation + Pré-exploitation",
-        duration: "1 mois et demi",
-        startMonth: 14,
-        endMonth: 15.5,
-        startLabel: "14ème mois",
-        color: "#14b8a6",
-        gradient: "linear-gradient(135deg, #2dd4bf, #14b8a6)",
-        detail: "Essais techniques des installations, formation du personnel, mise en route progressive des équipements"
-    },
-    {
-        name: "Réception provisoire",
-        duration: "16ème mois",
-        startMonth: 16,
-        endMonth: 16,
-        startLabel: "16ème mois",
-        color: "#10b981",
-        gradient: "linear-gradient(135deg, #34d399, #10b981)",
-        detail: "Réception provisoire des travaux, procès-verbal de réception, levée des réserves éventuelles",
-        isMilestone: true
-    }
-];
-
-function initV2() {
-    renderTaskPanelV2();
-    renderTimelineV2();
-    renderLegendV2();
-}
-
-function renderTaskPanelV2() {
-    const panel = document.getElementById('taskPanelV2');
-    let html = '<div class="task-panel-header">Désignation des tâches — V2 (16 mois)</div>';
-    TASKS_V2.forEach((task, i) => {
-        html += `
-            <div class="task-item">
-                <div class="task-color" style="background:${task.color}"></div>
-                <div class="task-info">
-                    <div class="task-name">${task.name}</div>
-                    <div class="task-duration">${task.isMilestone ? 'Jalon' : task.duration}</div>
-                </div>
-                <div class="task-start-badge">${task.startLabel}</div>
-            </div>
-        `;
-    });
-    panel.innerHTML = html;
-}
-
-function renderTimelineV2() {
-    const scroll = document.getElementById('timelineScrollV2');
-    scroll.innerHTML = '';
-    scroll.style.width = (TOTAL_MONTHS_V2 * monthWidthV2) + 'px';
-
-    const header = document.createElement('div');
-    header.className = 'timeline-header';
-    for (let m = 0; m < TOTAL_MONTHS_V2; m++) {
-        const div = document.createElement('div');
-        div.className = 'timeline-month';
-        div.style.width = monthWidthV2 + 'px';
-        if (m === 0) {
-            div.classList.add('ods');
-            div.innerHTML = `<span>ODS</span><span class="month-sub">Mois 0</span>`;
-        } else if (m === 16) {
-            div.classList.add('reception');
-            div.innerHTML = `<span>${m}</span><span class="month-sub">Réc. Prov.</span>`;
-        } else {
-            let sub = '';
-            if (m % 4 === 0) sub = `<span class="month-sub">Mois ${m}</span>`;
-            div.innerHTML = `<span>${m}</span>${sub}`;
-        }
-        header.appendChild(div);
-    }
-    scroll.appendChild(header);
-
-    const rowsContainer = document.createElement('div');
-    rowsContainer.style.position = 'relative';
-
-    TASKS_V2.forEach((task, i) => {
-        const row = document.createElement('div');
-        row.className = 'gantt-row';
-
-        for (let m = 0; m < TOTAL_MONTHS_V2; m++) {
-            const line = document.createElement('div');
-            line.className = 'grid-line' + (m % 4 === 0 ? ' major' : '');
-            line.style.left = (m * monthWidthV2) + 'px';
-            row.appendChild(line);
-        }
-
-        if (i === 0) {
-            const marker = document.createElement('div');
-            marker.className = 'marker ods';
-            marker.style.left = '0px';
-            marker.innerHTML = '<div class="marker-label">ODS</div>';
-            row.appendChild(marker);
-        }
-        if (i === TASKS_V2.length - 1) {
-            const marker = document.createElement('div');
-            marker.className = 'marker reception';
-            marker.style.left = (16 * monthWidthV2) + 'px';
-            marker.innerHTML = '<div class="marker-label">Réception</div>';
-            row.appendChild(marker);
-        }
-
-        if (task.isMilestone) {
-            const bar = document.createElement('div');
-            bar.className = 'gantt-bar milestone animate';
-            bar.style.left = (task.startMonth * monthWidthV2 - 14) + 'px';
-            bar.style.background = task.gradient;
-            bar.style.animationDelay = (i * 0.06) + 's';
-            bar.innerHTML = '<span class="milestone-inner">◆</span>';
-            bar.onmouseenter = (e) => showTooltipV2(e, task);
-            bar.onmouseleave = hideTooltip;
-            bar.onmousemove = moveTooltip;
-            row.appendChild(bar);
-        } else {
-            const bar = document.createElement('div');
-            bar.className = 'gantt-bar animate';
-            const leftPx = task.startMonth * monthWidthV2 + 2;
-            const widthPx = Math.max((task.endMonth - task.startMonth) * monthWidthV2 - 4, 20);
-            bar.style.left = leftPx + 'px';
-            bar.style.width = widthPx + 'px';
-            bar.style.background = task.gradient;
-            bar.style.animationDelay = (i * 0.06) + 's';
-
-            let labelText = '';
-            if (widthPx > 160) {
-                labelText = `${task.name} <span class="bar-duration">: ${task.duration}</span>`;
-            } else if (widthPx > 70) {
-                labelText = task.duration;
-            }
-            bar.innerHTML = labelText;
-
-            bar.onmouseenter = (e) => showTooltipV2(e, task);
-            bar.onmouseleave = hideTooltip;
-            bar.onmousemove = moveTooltip;
-            row.appendChild(bar);
-        }
-        rowsContainer.appendChild(row);
-    });
-
-    scroll.appendChild(rowsContainer);
-
-    setTimeout(() => {
-        scroll.querySelectorAll('.gantt-bar.animate').forEach((bar, i) => {
-            bar.style.opacity = '0';
-            setTimeout(() => { bar.style.opacity = '1'; }, i * 60);
-        });
-    }, 100);
-}
-
-function setZoomV2(level) {
-    monthWidthV2 = 75 * level;
-    document.querySelectorAll('.zoom-controls').forEach((ctrl, idx) => {
-        if (idx === 1) {
-            ctrl.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
-        }
-    });
-    event.target.classList.add('active');
-    renderTimelineV2();
-}
-
-function showTooltipV2(e, task) {
-    const tt = document.getElementById('tooltip');
-    document.getElementById('tooltipTitle').textContent = task.name;
-    document.getElementById('tooltipTitle').style.color = task.color;
-    document.getElementById('tooltipDetail').textContent = task.detail;
-
-    let meta = '';
-    if (task.isMilestone) {
-        meta = `<div class="tooltip-meta-item"><span>Jalon :</span> Mois 16</div>`;
-        meta += `<div class="tooltip-meta-item"><span>Type :</span> Réception provisoire</div>`;
-    } else {
-        meta += `<div class="tooltip-meta-item"><span>Durée :</span> ${task.duration}</div>`;
-        meta += `<div class="tooltip-meta-item"><span>Début :</span> ${task.startLabel}</div>`;
-        meta += `<div class="tooltip-meta-item"><span>Fin :</span> Mois ${task.endMonth}</div>`;
-    }
-    meta += `<div class="tooltip-meta-item" style="color:var(--accent-orange)"><span>Version :</span> 16 mois</div>`;
-    document.getElementById('tooltipMeta').innerHTML = meta;
-    tt.classList.add('visible');
-    moveTooltip(e);
-}
-
-function renderLegendV2() {
-    const container = document.getElementById('legendV2');
-    let html = '<div class="legend-container"><span class="legend-title">Légende — Version 16 mois</span>';
-    TASKS_V2.forEach(t => {
-        html += `<div class="legend-item"><div class="legend-swatch" style="background:${t.gradient}"></div>${t.name}${t.isMilestone ? '' : ' : ' + t.duration}</div>`;
-    });
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-document.addEventListener('DOMContentLoaded', initV2);
-
-// ══════════════════════════════════════════════════════
-// ═══════════  EDITOR FUNCTIONALITY  ══════════════════
-// ══════════════════════════════════════════════════════
-
-let currentEditorVersion = 'v1';
-
-function toggleEditor() {
-    const panel = document.getElementById('editorPanel');
-    const overlay = document.getElementById('editorOverlay');
-    const btn = document.getElementById('editorToggle');
-    const isOpen = panel.classList.contains('open');
-
-    if (isOpen) {
-        panel.classList.remove('open');
-        overlay.classList.remove('visible');
-        btn.classList.remove('active');
-        btn.innerHTML = '✏️';
-    } else {
-        panel.classList.add('open');
-        overlay.classList.add('visible');
-        btn.classList.add('active');
-        btn.innerHTML = '✕';
-        populateEditorTasks();
-    }
-}
-
-function switchEditorVersion(version) {
-    currentEditorVersion = version;
-    document.querySelectorAll('.version-tab').forEach((tab, i) => {
-        tab.classList.toggle('active', (i === 0 && version === 'v1') || (i === 1 && version === 'v2'));
-    });
-    const title = version === 'v1' ? 'Tâches — Version 24 mois' : 'Tâches — Version 16 mois';
-    document.getElementById('editorTasksTitle').textContent = title;
-    populateEditorTasks();
-}
-
-function getEditableTasks() {
-    return currentEditorVersion === 'v1' ? TASKS : TASKS_V2;
-}
-
-function populateEditorTasks() {
-    const tasks = getEditableTasks();
-    const tbody = document.getElementById('taskEditorBody');
-    tbody.innerHTML = '';
-
+function renderTaskList() {
+    const container = document.getElementById('taskList');
+    container.innerHTML = '';
     tasks.forEach((task, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><input type="color" value="${task.color}" data-idx="${i}" data-field="color"></td>
-            <td><input type="text" value="${task.name}" data-idx="${i}" data-field="name" style="min-width:140px"></td>
-            <td><input type="text" value="${task.isMilestone ? 'Jalon' : task.duration}" data-idx="${i}" data-field="duration" style="min-width:80px"></td>
-            <td><input type="number" value="${task.startMonth}" data-idx="${i}" data-field="startMonth" step="0.5" min="0"></td>
-            <td><input type="number" value="${task.endMonth}" data-idx="${i}" data-field="endMonth" step="0.5" min="0"></td>
-            <td><button class="btn-delete-task" onclick="deleteEditorTask(${i})" title="Supprimer">✕</button></td>
+        const div = document.createElement('div');
+        div.className = 'task-card';
+        div.innerHTML = `
+            <input type="color" value="${task.color}" onchange="tasks[${i}].color=this.value">
+            <div class="task-card-fields">
+                <input type="text" value="${task.name}" placeholder="Nom de la tâche" onchange="tasks[${i}].name=this.value">
+                <input type="text" value="${task.duration}" placeholder="Durée" onchange="tasks[${i}].duration=this.value">
+                <input type="number" value="${task.start}" placeholder="Début" step="0.5" min="0" onchange="tasks[${i}].start=parseFloat(this.value)||0">
+                <input type="number" value="${task.end}" placeholder="Fin" step="0.5" min="0" onchange="tasks[${i}].end=parseFloat(this.value)||0">
+            </div>
+            <button class="btn-del" onclick="removeTask(${task.id})">✕</button>
         `;
-        tbody.appendChild(tr);
+        container.appendChild(div);
     });
 }
 
-function addEditorTask() {
-    const tasks = getEditableTasks();
-    const lastEnd = tasks.length > 0 ? tasks[tasks.length - 1].endMonth : 0;
-    const newTask = {
-        name: "Nouvelle tâche",
-        duration: "1 mois",
-        startMonth: lastEnd,
-        endMonth: lastEnd + 1,
-        startLabel: `M${Math.round(lastEnd)}`,
-        color: "#6366f1",
-        gradient: "linear-gradient(135deg, #6366f1, #4f46e5)",
-        detail: "Description de la tâche"
-    };
-    tasks.push(newTask);
-    populateEditorTasks();
+function darken(hex, amt) {
+    hex = hex.replace('#','');
+    let r = Math.max(0, parseInt(hex.substring(0,2),16) - amt);
+    let g = Math.max(0, parseInt(hex.substring(2,4),16) - amt);
+    let b = Math.max(0, parseInt(hex.substring(4,6),16) - amt);
+    return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
 }
 
-function deleteEditorTask(idx) {
-    const tasks = getEditableTasks();
-    if (tasks.length <= 1) return;
-    tasks.splice(idx, 1);
-    populateEditorTasks();
-}
+function generateChart() {
+    const title = document.getElementById('inTitle').value || 'PLANNING DE RÉALISATION';
+    const subtitle = document.getElementById('inSubtitle').value || '';
+    const delai = document.getElementById('inDelai').value || '';
+    const totalMonths = parseInt(document.getElementById('inMonths').value) || 24;
+    const monthWidth = parseInt(document.getElementById('inMonthWidth').value) || 60;
+    const numMonths = totalMonths + 1;
 
-function applyEditorChanges() {
-    // Update titles
-    const newTitle = document.getElementById('editTitle').value;
-    const newSubtitle = document.getElementById('editSubtitle').value;
-    const newDelai = document.getElementById('editDelai').value;
+    if (tasks.length === 0) { showToast('⚠ Ajoutez au moins une tâche'); return; }
 
-    document.querySelector('.header h1').textContent = newTitle;
-    document.querySelector('.header .subtitle').textContent = newSubtitle;
-    document.querySelector('.delai-bar').innerHTML = `<strong>Délai d'exécution :</strong> ${newDelai}`;
+    document.getElementById('emptyState').style.display = 'none';
+    const preview = document.getElementById('ganttPreview');
+    preview.classList.add('visible');
 
-    // Read task values from editor inputs
-    const tasks = getEditableTasks();
-    const rows = document.querySelectorAll('#taskEditorBody tr');
+    // Header
+    let headerHTML = `<div class="gantt-header-block">
+        <h2>${title}</h2>
+        ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
+        ${delai ? `<div class="delai"><strong>Délai d'exécution :</strong> ${delai}</div>` : ''}
+        <div class="badges">
+            <div class="badge-item b1"><span style="color:var(--text-muted);font-weight:400">Délai :</span> ${totalMonths} mois</div>
+            <div class="badge-item b2"><span style="color:var(--text-muted);font-weight:400">Tâches :</span> ${tasks.length}</div>
+        </div>
+    </div>`;
 
-    rows.forEach((row, i) => {
-        if (i >= tasks.length) return;
-        const inputs = row.querySelectorAll('input');
-        inputs.forEach(input => {
-            const field = input.dataset.field;
-            const idx = parseInt(input.dataset.idx);
-            if (idx !== i) return;
-
-            if (field === 'color') {
-                tasks[idx].color = input.value;
-                const hex = input.value;
-                // Darken for gradient
-                tasks[idx].gradient = `linear-gradient(135deg, ${hex}, ${darkenHex(hex, 25)})`;
-            } else if (field === 'name') {
-                tasks[idx].name = input.value;
-            } else if (field === 'duration') {
-                tasks[idx].duration = input.value;
-            } else if (field === 'startMonth') {
-                tasks[idx].startMonth = parseFloat(input.value) || 0;
-                // Update start label
-                const sm = tasks[idx].startMonth;
-                if (sm === 0) tasks[idx].startLabel = 'ODS';
-                else if (sm < 1) tasks[idx].startLabel = `${Math.round(sm * 30)}J`;
-                else tasks[idx].startLabel = `${sm}ème mois`;
-            } else if (field === 'endMonth') {
-                tasks[idx].endMonth = parseFloat(input.value) || 0;
-            }
-        });
+    // Task panel
+    let taskPanelHTML = `<div class="g-task-header">Désignation des tâches</div>`;
+    tasks.forEach(t => {
+        const isMilestone = t.start === t.end;
+        taskPanelHTML += `<div class="g-task-row">
+            <div class="g-task-dot" style="background:${t.color}"></div>
+            <div class="g-task-info">
+                <div class="g-task-name">${t.name || 'Sans nom'}</div>
+                <div class="g-task-dur">${isMilestone ? 'Jalon' : (t.duration || '')}</div>
+            </div>
+        </div>`;
     });
 
-    // Re-render the correct version
-    if (currentEditorVersion === 'v1') {
-        renderTaskPanel();
-        renderTimeline();
-        renderLegend();
-    } else {
-        renderTaskPanelV2();
-        renderTimelineV2();
-        renderLegendV2();
+    // Timeline header
+    let timeHeaderHTML = '';
+    for (let m = 0; m < numMonths; m++) {
+        let cls = '';
+        let label = `<span>${m}</span>`;
+        if (m === 0) { cls = ' first'; label = `<span>0</span><span class="msub">Début</span>`; }
+        else if (m === totalMonths) { cls = ' last'; label = `<span>${m}</span><span class="msub">Fin</span>`; }
+        else if (m % Math.max(1, Math.floor(totalMonths/6)) === 0) { label = `<span>${m}</span><span class="msub">Mois ${m}</span>`; }
+        timeHeaderHTML += `<div class="g-month${cls}" style="width:${monthWidth}px">${label}</div>`;
     }
 
-    showToast();
+    // Bars
+    let barsHTML = '';
+    tasks.forEach((t, i) => {
+        let gridlines = '';
+        for (let m = 0; m < numMonths; m++) {
+            gridlines += `<div class="g-gridline" style="left:${m * monthWidth}px"></div>`;
+        }
+
+        const isMilestone = t.start === t.end;
+        let barHTML = '';
+        const grad = `linear-gradient(135deg, ${t.color}, ${darken(t.color, 30)})`;
+
+        if (isMilestone) {
+            barHTML = `<div class="g-bar milestone" style="left:${t.start * monthWidth - 12}px;background:${grad};animation-delay:${i*0.05}s"><span>◆</span></div>`;
+        } else {
+            const left = t.start * monthWidth + 2;
+            const width = Math.max((t.end - t.start) * monthWidth - 4, 16);
+            let lbl = '';
+            if (width > 120) lbl = `${t.name}`;
+            else if (width > 60) lbl = t.duration;
+            barHTML = `<div class="g-bar" style="left:${left}px;width:${width}px;background:${grad};animation-delay:${i*0.05}s">${lbl}</div>`;
+        }
+
+        barsHTML += `<div class="g-bar-row">${gridlines}${barHTML}</div>`;
+    });
+
+    // Legend
+    let legendHTML = '<div class="g-legend"><span class="g-legend-title">Légende</span>';
+    tasks.forEach(t => {
+        const isMilestone = t.start === t.end;
+        legendHTML += `<div class="g-legend-item"><div class="g-legend-swatch" style="background:${t.color}"></div>${t.name || 'Sans nom'}${isMilestone ? '' : (t.duration ? ' : '+t.duration : '')}</div>`;
+    });
+    legendHTML += '</div>';
+
+    preview.innerHTML = `
+        ${headerHTML}
+        <div class="gantt-chart-area">
+            <div class="gantt-grid">
+                <div class="g-task-panel">${taskPanelHTML}</div>
+                <div class="g-timeline">
+                    <div class="g-timeline-scroll" style="width:${numMonths * monthWidth}px">
+                        <div class="g-timeline-header">${timeHeaderHTML}</div>
+                        ${barsHTML}
+                    </div>
+                </div>
+            </div>
+        </div>
+        ${legendHTML}
+    `;
+
+    showToast('✓ Diagramme généré avec succès !');
 }
 
-function resetEditor() {
-    document.getElementById('editTitle').value = 'PLANNING DE RÉALISATION';
-    document.getElementById('editSubtitle').value = "Réalisation des travaux d'un pôle médical";
-    document.getElementById('editDelai').value = "à partir de l'ODS notifié au service co-contractant par le service contractant.";
-    populateEditorTasks();
-    showToast('Formulaire réinitialisé');
-}
-
-function darkenHex(hex, amount) {
-    hex = hex.replace('#', '');
-    let r = Math.max(0, parseInt(hex.substring(0, 2), 16) - amount);
-    let g = Math.max(0, parseInt(hex.substring(2, 4), 16) - amount);
-    let b = Math.max(0, parseInt(hex.substring(4, 6), 16) - amount);
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+function clearAll() {
+    tasks = [];
+    taskIdCounter = 0;
+    document.getElementById('inTitle').value = '';
+    document.getElementById('inSubtitle').value = '';
+    document.getElementById('inDelai').value = '';
+    document.getElementById('inMonths').value = 24;
+    document.getElementById('inMonthWidth').value = 60;
+    renderTaskList();
+    document.getElementById('ganttPreview').classList.remove('visible');
+    document.getElementById('ganttPreview').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'flex';
+    showToast('Formulaire effacé');
 }
 
 function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg || '✓ Modifications appliquées avec succès !';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+// Init with empty task list
+renderTaskList();
 </script>
 
 </body>
