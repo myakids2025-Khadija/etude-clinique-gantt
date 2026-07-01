@@ -780,8 +780,42 @@ document.querySelector('.editor').addEventListener('input', () => {
     saveData();
 });
 
-// Init — load saved data
-loadData();
+// ══════════════════════════════════════════
+// ═══════ DONNÉES PAR DÉFAUT (V2 16 MOIS) ═
+// ══════════════════════════════════════════
+
+const DEFAULT_DATA = {
+    title: "PLANNING DE RÉALISATION",
+    subtitle: "Réalisation d'un pôle médical — Hôpital 240 lits",
+    delai: "à partir de l'ODS notifié au service co-contractant par le service contractant",
+    unit: "mois",
+    totalUnits: "16",
+    unitWidth: "75",
+    tasks: [
+        { name: "Installation de chantier", duration: "10 jours", start: 0, end: 0.33, color: "#ef4444", description: "Mise en place base vie, clôtures, branchements provisoires, signalisation chantier" },
+        { name: "Terrassements / Excavations", duration: "2 mois", start: 0.33, end: 2.33, color: "#b91c1c", description: "Fouilles en pleine masse, excavations, évacuation des déblais, nivellement du terrain" },
+        { name: "Infrastructure", duration: "5 mois", start: 2, end: 7, color: "#b45309", description: "Fondations, semelles, longrines, dallage, murs de soubassement, cuvelage" },
+        { name: "Superstructure", duration: "8 mois", start: 5, end: 13, color: "#2563eb", description: "Poteaux, poutres, planchers, voiles, escaliers, acrotères, structure béton armé" },
+        { name: "Maçonnerie et enduits", duration: "8 mois", start: 5, end: 13, color: "#16a34a", description: "Murs en briques/parpaings, cloisons de distribution, enduits intérieurs et extérieurs" },
+        { name: "VRD", duration: "11 mois", start: 2.5, end: 13.5, color: "#15803d", description: "Voiries et réseaux divers, assainissement, AEP, espaces extérieurs, trottoirs, parking" },
+        { name: "Électricité / Plomberie", duration: "11 mois", start: 3, end: 14, color: "#0ea5e9", description: "Réseaux électriques courants forts et faibles, plomberie sanitaire, alimentation en eau" },
+        { name: "Climatisation / Chauffage central", duration: "11 mois", start: 3, end: 14, color: "#7c3aed", description: "Climatisation centrale, chauffage central, ventilation mécanique, gaines techniques" },
+        { name: "Finition sol / Peinture", duration: "9 mois", start: 6, end: 15, color: "#c2410c", description: "Revêtements de sol (carrelage, PVC), peinture intérieure/extérieure, faux-plafonds, menuiseries" },
+        { name: "Nettoyage", duration: "1 mois et demi", start: 14, end: 15.5, color: "#eab308", description: "Nettoyage général de fin de chantier, évacuation gravats résiduels, nettoyage vitres et sols" },
+        { name: "Essais + Formation + Pré-exploitation", duration: "1 mois et demi", start: 14, end: 15.5, color: "#14b8a6", description: "Essais techniques des installations, formation du personnel, mise en route progressive des équipements" },
+        { name: "Réception provisoire", duration: "16ème mois", start: 16, end: 16, color: "#10b981", description: "Réception provisoire des travaux, procès-verbal de réception, levée des réserves éventuelles" }
+    ]
+};
+
+// Init — load saved data or default
+const savedRaw = localStorage.getItem(STORAGE_KEY);
+if (savedRaw) {
+    loadData();
+} else {
+    // First visit: load default data
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+    loadData();
+}
 </script>
 
 </body>
