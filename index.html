@@ -658,20 +658,25 @@ function generateChart() {
     `;
 
     showToast('✓ Diagramme généré avec succès !');
+    saveData();
 }
 
 function clearAll() {
+    if (!confirm('Tout effacer ? Les données sauvegardées seront supprimées.')) return;
     tasks = [];
     taskIdCounter = 0;
     document.getElementById('inTitle').value = '';
     document.getElementById('inSubtitle').value = '';
     document.getElementById('inDelai').value = '';
+    document.getElementById('inUnit').value = 'mois';
     document.getElementById('inMonths').value = 24;
     document.getElementById('inMonthWidth').value = 60;
+    onUnitChange();
     renderTaskList();
     document.getElementById('ganttPreview').classList.remove('visible');
     document.getElementById('ganttPreview').innerHTML = '';
     document.getElementById('emptyState').style.display = 'flex';
+    localStorage.removeItem('ganttData');
     showToast('Formulaire effacé');
 }
 
@@ -682,8 +687,101 @@ function showToast(msg) {
     setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// Init with empty task list
-renderTaskList();
+// ══════════════════════════════════════════
+// ═══════  SAUVEGARDE AUTOMATIQUE  ════════
+// ══════════════════════════════════════════
+
+const STORAGE_KEY = 'ganttData';
+
+function saveData() {
+    const data = {
+        title: document.getElementById('inTitle').value,
+        subtitle: document.getElementById('inSubtitle').value,
+        delai: document.getElementById('inDelai').value,
+        unit: document.getElementById('inUnit').value,
+        totalUnits: document.getElementById('inMonths').value,
+        unitWidth: document.getElementById('inMonthWidth').value,
+        tasks: tasks.map(t => ({
+            name: t.name,
+            duration: t.duration,
+            start: t.start,
+            end: t.end,
+            color: t.color,
+            description: t.description || ''
+        }))
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadData() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { renderTaskList(); return; }
+
+    try {
+        const data = JSON.parse(raw);
+        document.getElementById('inTitle').value = data.title || '';
+        document.getElementById('inSubtitle').value = data.subtitle || '';
+        document.getElementById('inDelai').value = data.delai || '';
+        document.getElementById('inUnit').value = data.unit || 'mois';
+        document.getElementById('inMonths').value = data.totalUnits || 24;
+        document.getElementById('inMonthWidth').value = data.unitWidth || 60;
+
+        // Update labels for unit
+        const u = data.unit || 'mois';
+        document.getElementById('lblTotal').textContent = u === 'jours' ? 'Durée totale (jours)' : 'Durée totale (mois)';
+        document.getElementById('lblWidth').textContent = u === 'jours' ? 'Largeur par jour (px)' : 'Largeur par mois (px)';
+
+        // Load tasks
+        tasks = [];
+        taskIdCounter = 0;
+        if (data.tasks && data.tasks.length > 0) {
+            data.tasks.forEach(t => {
+                tasks.push({
+                    id: taskIdCounter++,
+                    name: t.name || '',
+                    duration: t.duration || '',
+                    start: t.start || 0,
+                    end: t.end || 0,
+                    color: t.color || COLORS[tasks.length % COLORS.length],
+                    description: t.description || ''
+                });
+            });
+        }
+        renderTaskList();
+
+        // Auto-generate if there are tasks
+        if (tasks.length > 0) {
+            generateChart();
+        }
+
+        showToast('💾 Données restaurées automatiquement');
+    } catch (e) {
+        console.warn('Erreur chargement données:', e);
+        renderTaskList();
+    }
+}
+
+// Auto-save on every input change in the editor
+document.querySelector('.editor').addEventListener('input', () => {
+    // Sync task fields from DOM
+    document.querySelectorAll('.task-card').forEach((card, i) => {
+        if (i >= tasks.length) return;
+        const inputs = card.querySelectorAll('input');
+        const textarea = card.querySelector('.task-card-desc textarea');
+        inputs.forEach(inp => {
+            if (inp.type === 'color') tasks[i].color = inp.value;
+            else if (inp.placeholder?.includes('Nom')) tasks[i].name = inp.value;
+            else if (inp.placeholder?.includes('Durée')) tasks[i].duration = inp.value;
+            else if (inp.placeholder?.includes('Début')) tasks[i].start = parseFloat(inp.value) || 0;
+            else if (inp.placeholder?.includes('Fin')) tasks[i].end = parseFloat(inp.value) || 0;
+        });
+        if (textarea) tasks[i].description = textarea.value;
+    });
+    saveData();
+});
+
+// Init — load saved data
+loadData();
 </script>
 
 </body>
