@@ -112,10 +112,12 @@
         .task-card {
             background: var(--bg-primary); border: 1px solid var(--border);
             border-radius: 10px; padding: 10px 12px;
-            display: grid; grid-template-columns: 30px 1fr auto; gap: 10px;
-            align-items: center; transition: border-color 0.2s;
+            transition: border-color 0.2s;
         }
         .task-card:hover { border-color: rgba(59,130,246,0.3); }
+        .task-card-top {
+            display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center;
+        }
 
         .task-card input[type="color"] {
             width: 28px; height: 28px; padding: 1px; border-radius: 6px;
@@ -129,6 +131,19 @@
         }
         .task-card-fields input:focus { border-color: var(--accent-blue); }
         .task-card-fields input::placeholder { color: var(--text-muted); }
+
+        .task-card-desc {
+            margin-top: 8px; padding-left: 40px;
+        }
+        .task-card-desc textarea {
+            width: 100%; padding: 7px 10px; border-radius: 6px;
+            border: 1px solid var(--border); background: var(--bg-card);
+            color: var(--text-primary); font-family: 'Inter', sans-serif;
+            font-size: 11px; outline: none; resize: vertical;
+            min-height: 36px; max-height: 120px;
+        }
+        .task-card-desc textarea:focus { border-color: var(--accent-blue); }
+        .task-card-desc textarea::placeholder { color: var(--text-muted); }
 
         .btn-del {
             width: 26px; height: 26px; border: none; border-radius: 6px;
@@ -295,6 +310,54 @@
         .g-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-secondary); }
         .g-legend-swatch { width: 12px; height: 6px; border-radius: 3px; }
 
+        /* ─── Task Descriptions ─── */
+        .desc-section {
+            margin-top: 24px;
+        }
+        .desc-section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .desc-section-title::before { content: '📝'; font-size: 14px; }
+        .desc-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+        .desc-cards { display: flex; flex-direction: column; gap: 10px; }
+        .desc-card {
+            padding: 16px 20px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 14px; backdrop-filter: blur(10px);
+            border-left: 4px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .desc-card:hover { border-color: var(--glass-border); }
+        .desc-card-head {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+        }
+        .desc-card-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .desc-card-num {
+            font-size: 10px; font-weight: 700; color: var(--text-muted);
+            background: rgba(255,255,255,0.05); border-radius: 4px;
+            padding: 2px 6px;
+        }
+        .desc-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+        .desc-card-meta {
+            display: flex; gap: 16px; margin-bottom: 8px; flex-wrap: wrap;
+        }
+        .desc-card-tag {
+            font-size: 11px; color: var(--text-muted);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .desc-card-tag strong { color: var(--text-secondary); font-weight: 600; }
+        .desc-card-text {
+            font-size: 12px; color: var(--text-secondary);
+            line-height: 1.7; white-space: pre-wrap;
+        }
+        .desc-card-empty {
+            font-size: 11px; color: var(--text-muted); font-style: italic;
+        }
+
         /* Toast */
         .toast {
             position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -387,10 +450,10 @@ const COLORS = [
     '#ec4899','#8b5cf6','#f97316','#06b6d4','#84cc16','#f43f5e'
 ];
 
-function addTask(name='', duration='', start='', end='', color='') {
+function addTask(name='', duration='', start='', end='', color='', description='') {
     const id = taskIdCounter++;
     if (!color) color = COLORS[tasks.length % COLORS.length];
-    tasks.push({ id, name, duration, start: parseFloat(start)||0, end: parseFloat(end)||0, color });
+    tasks.push({ id, name, duration, start: parseFloat(start)||0, end: parseFloat(end)||0, color, description });
     renderTaskList();
 }
 
@@ -406,14 +469,19 @@ function renderTaskList() {
         const div = document.createElement('div');
         div.className = 'task-card';
         div.innerHTML = `
-            <input type="color" value="${task.color}" onchange="tasks[${i}].color=this.value">
-            <div class="task-card-fields">
-                <input type="text" value="${task.name}" placeholder="Nom de la tâche" onchange="tasks[${i}].name=this.value">
-                <input type="text" value="${task.duration}" placeholder="Durée" onchange="tasks[${i}].duration=this.value">
-                <input type="number" value="${task.start}" placeholder="Début" step="0.5" min="0" onchange="tasks[${i}].start=parseFloat(this.value)||0">
-                <input type="number" value="${task.end}" placeholder="Fin" step="0.5" min="0" onchange="tasks[${i}].end=parseFloat(this.value)||0">
+            <div class="task-card-top">
+                <input type="color" value="${task.color}" onchange="tasks[${i}].color=this.value">
+                <div class="task-card-fields">
+                    <input type="text" value="${task.name}" placeholder="Nom de la tâche" onchange="tasks[${i}].name=this.value">
+                    <input type="text" value="${task.duration}" placeholder="Durée" onchange="tasks[${i}].duration=this.value">
+                    <input type="number" value="${task.start}" placeholder="Début" step="0.5" min="0" onchange="tasks[${i}].start=parseFloat(this.value)||0">
+                    <input type="number" value="${task.end}" placeholder="Fin" step="0.5" min="0" onchange="tasks[${i}].end=parseFloat(this.value)||0">
+                </div>
+                <button class="btn-del" onclick="removeTask(${task.id})">✕</button>
             </div>
-            <button class="btn-del" onclick="removeTask(${task.id})">✕</button>
+            <div class="task-card-desc">
+                <textarea placeholder="Description de la tâche (optionnel)..." onchange="tasks[${i}].description=this.value">${task.description || ''}</textarea>
+            </div>
         `;
         container.appendChild(div);
     });
@@ -510,6 +578,29 @@ function generateChart() {
     });
     legendHTML += '</div>';
 
+    // Task descriptions section
+    let descHTML = '';
+    const hasAnyDesc = tasks.some(t => t.description && t.description.trim());
+    if (hasAnyDesc || tasks.length > 0) {
+        descHTML = '<div class="desc-section"><div class="desc-section-title">Description des tâches</div><div class="desc-cards">';
+        tasks.forEach((t, i) => {
+            const isMilestone = t.start === t.end;
+            descHTML += `<div class="desc-card" style="border-left-color:${t.color}">
+                <div class="desc-card-head">
+                    <div class="desc-card-dot" style="background:${t.color}"></div>
+                    <span class="desc-card-num">#${i+1}</span>
+                    <span class="desc-card-name">${t.name || 'Sans nom'}</span>
+                </div>
+                <div class="desc-card-meta">
+                    <span class="desc-card-tag">⏱ <strong>${isMilestone ? 'Jalon' : (t.duration || '—')}</strong></span>
+                    <span class="desc-card-tag">📅 Mois <strong>${t.start}</strong> → <strong>${t.end}</strong></span>
+                </div>
+                ${t.description && t.description.trim() ? `<div class="desc-card-text">${t.description}</div>` : '<div class="desc-card-empty">Aucune description ajoutée</div>'}
+            </div>`;
+        });
+        descHTML += '</div></div>';
+    }
+
     preview.innerHTML = `
         ${headerHTML}
         <div class="gantt-chart-area">
@@ -524,6 +615,7 @@ function generateChart() {
             </div>
         </div>
         ${legendHTML}
+        ${descHTML}
     `;
 
     showToast('✓ Diagramme généré avec succès !');
