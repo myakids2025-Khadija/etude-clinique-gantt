@@ -170,6 +170,15 @@
         }
         .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(59,130,246,0.4); }
 
+        .btn-share {
+            width: 100%; padding: 12px; margin-top: 8px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-emerald), var(--accent-cyan));
+            color: white; font-family: 'Inter', sans-serif;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 16px rgba(16,185,129,0.3); transition: all 0.2s;
+        }
+        .btn-share:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(16,185,129,0.4); }
+
         .btn-clear {
             width: 100%; padding: 10px; margin-top: 8px;
             border: 1px solid var(--border); border-radius: 10px;
@@ -178,6 +187,49 @@
             cursor: pointer; transition: all 0.2s;
         }
         .btn-clear:hover { border-color: var(--accent-rose); color: var(--accent-rose); }
+
+        /* Share Modal */
+        .share-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px); z-index: 100;
+            display: none; align-items: center; justify-content: center;
+        }
+        .share-overlay.visible { display: flex; }
+        .share-modal {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 20px; padding: 28px; width: 520px; max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .share-modal h3 {
+            font-size: 16px; font-weight: 800; margin-bottom: 6px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .share-modal .share-desc {
+            font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;
+        }
+        .share-url-box {
+            display: flex; gap: 8px; margin-bottom: 14px;
+        }
+        .share-url-box input {
+            flex: 1; padding: 10px 14px; border-radius: 10px;
+            border: 1px solid var(--border); background: var(--bg-primary);
+            color: var(--accent-cyan); font-family: 'Inter', sans-serif;
+            font-size: 11px; outline: none;
+        }
+        .share-url-box button {
+            padding: 10px 18px; border: none; border-radius: 10px;
+            background: var(--accent-blue); color: white;
+            font-family: 'Inter', sans-serif; font-size: 12px;
+            font-weight: 700; cursor: pointer; white-space: nowrap;
+        }
+        .share-url-box button:hover { background: var(--accent-purple); }
+        .share-close {
+            width: 100%; padding: 10px; border: 1px solid var(--border);
+            border-radius: 10px; background: transparent;
+            color: var(--text-muted); font-family: 'Inter', sans-serif;
+            font-size: 12px; cursor: pointer;
+        }
+        .share-close:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
 
         /* ─── Preview Panel ─── */
         .preview {
@@ -430,6 +482,7 @@
 
         <div class="section">
             <button class="btn-generate" onclick="generateChart()">✦ Générer le diagramme</button>
+            <button class="btn-share" onclick="shareChart()">🔗 Partager le lien</button>
             <button class="btn-clear" onclick="clearAll()">Tout effacer</button>
         </div>
     </div>
@@ -446,6 +499,19 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Share Modal -->
+<div class="share-overlay" id="shareOverlay" onclick="if(event.target===this)closeShare()">
+    <div class="share-modal">
+        <h3>🔗 Partager votre diagramme</h3>
+        <div class="share-desc">Ce lien contient toutes vos données. La personne qui l'ouvre verra exactement votre diagramme avec toutes les modifications.</div>
+        <div class="share-url-box">
+            <input type="text" id="shareUrlInput" readonly>
+            <button onclick="copyShareUrl()">📋 Copier</button>
+        </div>
+        <button class="share-close" onclick="closeShare()">Fermer</button>
+    </div>
+</div>
 
 <script>
 let tasks = [];
@@ -807,14 +873,117 @@ const DEFAULT_DATA = {
     ]
 };
 
-// Init — load saved data or default
-const savedRaw = localStorage.getItem(STORAGE_KEY);
-if (savedRaw) {
-    loadData();
-} else {
-    // First visit: load default data
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
-    loadData();
+// ══════════════════════════════════════════
+// ═══════════  PARTAGE PAR LIEN  ══════════
+// ══════════════════════════════════════════
+
+function buildShareData() {
+    return {
+        title: document.getElementById('inTitle').value,
+        subtitle: document.getElementById('inSubtitle').value,
+        delai: document.getElementById('inDelai').value,
+        unit: document.getElementById('inUnit').value,
+        totalUnits: document.getElementById('inMonths').value,
+        unitWidth: document.getElementById('inMonthWidth').value,
+        tasks: tasks.map(t => ({
+            n: t.name, d: t.duration, s: t.start, e: t.end,
+            c: t.color, desc: t.description || ''
+        }))
+    };
+}
+
+function shareChart() {
+    try {
+        const data = buildShareData();
+        const json = JSON.stringify(data);
+        const encoded = btoa(unescape(encodeURIComponent(json)));
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = baseUrl + '#data=' + encoded;
+        
+        document.getElementById('shareUrlInput').value = shareUrl;
+        document.getElementById('shareOverlay').classList.add('visible');
+    } catch (e) {
+        showToast('⚠ Erreur lors du partage');
+        console.error(e);
+    }
+}
+
+function copyShareUrl() {
+    const input = document.getElementById('shareUrlInput');
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+        showToast('✓ Lien copié dans le presse-papier !');
+    }).catch(() => {
+        document.execCommand('copy');
+        showToast('✓ Lien copié !');
+    });
+}
+
+function closeShare() {
+    document.getElementById('shareOverlay').classList.remove('visible');
+}
+
+function loadFromUrlHash() {
+    const hash = window.location.hash;
+    if (!hash || !hash.startsWith('#data=')) return false;
+    
+    try {
+        const encoded = hash.substring(6);
+        const json = decodeURIComponent(escape(atob(encoded)));
+        const data = JSON.parse(json);
+        
+        document.getElementById('inTitle').value = data.title || '';
+        document.getElementById('inSubtitle').value = data.subtitle || '';
+        document.getElementById('inDelai').value = data.delai || '';
+        document.getElementById('inUnit').value = data.unit || 'mois';
+        document.getElementById('inMonths').value = data.totalUnits || 24;
+        document.getElementById('inMonthWidth').value = data.unitWidth || 60;
+
+        const u = data.unit || 'mois';
+        document.getElementById('lblTotal').textContent = u === 'jours' ? 'Durée totale (jours)' : 'Durée totale (mois)';
+        document.getElementById('lblWidth').textContent = u === 'jours' ? 'Largeur par jour (px)' : 'Largeur par mois (px)';
+
+        tasks = [];
+        taskIdCounter = 0;
+        if (data.tasks) {
+            data.tasks.forEach(t => {
+                tasks.push({
+                    id: taskIdCounter++,
+                    name: t.n || t.name || '',
+                    duration: t.d || t.duration || '',
+                    start: t.s ?? t.start ?? 0,
+                    end: t.e ?? t.end ?? 0,
+                    color: t.c || t.color || COLORS[tasks.length % COLORS.length],
+                    description: t.desc || t.description || ''
+                });
+            });
+        }
+        renderTaskList();
+        if (tasks.length > 0) generateChart();
+        
+        // Save to localStorage for persistence
+        saveData();
+        
+        // Clean URL hash
+        history.replaceState(null, '', window.location.pathname);
+        
+        showToast('📨 Diagramme partagé chargé avec succès !');
+        return true;
+    } catch (e) {
+        console.warn('Erreur chargement lien partagé:', e);
+        return false;
+    }
+}
+
+// Init — check URL hash first, then localStorage, then defaults
+if (!loadFromUrlHash()) {
+    const savedRaw = localStorage.getItem(STORAGE_KEY);
+    if (savedRaw) {
+        loadData();
+    } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
+        loadData();
+    }
 }
 </script>
 
