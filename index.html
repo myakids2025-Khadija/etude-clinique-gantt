@@ -1034,11 +1034,18 @@ function loadSubProjects() {
     const raw = localStorage.getItem(SP_STORAGE_KEY);
     if (!raw) {
         // Initialize with default sub-projects
+        console.log('[Gantt] No sub-projects in storage, loading defaults...');
         initDefaultSubProjects();
         return;
     }
     try {
         const spData = JSON.parse(raw);
+        // If saved data is empty array, load defaults
+        if (!Array.isArray(spData) || spData.length === 0) {
+            console.log('[Gantt] Empty sub-projects array, loading defaults...');
+            initDefaultSubProjects();
+            return;
+        }
         subProjects = [];
         spIdCounter = 0;
         spData.forEach(sp => {
@@ -1062,6 +1069,7 @@ function loadSubProjects() {
                 }))
             });
         });
+        console.log('[Gantt] Loaded', subProjects.length, 'sub-projects from storage');
         renderSubProjectsList();
     } catch(e) {
         console.warn('Erreur chargement sous-projets:', e);
@@ -1480,6 +1488,9 @@ function loadFromUrlHash() {
 
 // Init — check URL hash first, then localStorage, then defaults
 if (!loadFromUrlHash()) {
+    // Load sub-projects FIRST (before generateChart is called by loadData)
+    loadSubProjects();
+
     const savedRaw = localStorage.getItem(STORAGE_KEY);
     if (savedRaw) {
         loadData();
@@ -1487,8 +1498,13 @@ if (!loadFromUrlHash()) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
         loadData();
     }
-    // Load sub-projects (from storage or defaults)
-    loadSubProjects();
+} else {
+    // Also load sub-projects when coming from a shared URL
+    if (subProjects.length === 0) {
+        loadSubProjects();
+    }
+    // Re-generate to include sub-projects
+    if (tasks.length > 0) generateChart();
 }
 </script>
 
