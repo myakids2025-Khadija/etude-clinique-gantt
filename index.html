@@ -419,6 +419,130 @@
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        /* ─── Sub-project Editor Styles ─── */
+        .subprojects-divider {
+            margin: 28px 0 20px;
+            border: none;
+            border-top: 2px solid var(--border);
+            position: relative;
+        }
+
+        .subprojects-section-header {
+            font-size: 11px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.2px; color: var(--accent-orange); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .subprojects-section-header::after { content:''; flex:1; height:1px; background: var(--accent-orange); opacity: 0.3; }
+
+        .btn-add-subproject {
+            width: 100%; padding: 11px; border: 2px dashed var(--accent-orange);
+            border-radius: 10px; background: rgba(249,115,22,0.05); color: var(--accent-orange);
+            font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s; margin-top: 10px;
+        }
+        .btn-add-subproject:hover { background: rgba(249,115,22,0.12); border-color: var(--accent-amber); }
+
+        .sp-panel {
+            margin-top: 10px; border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border); background: var(--bg-primary);
+            transition: border-color 0.3s;
+        }
+        .sp-panel.accent-orange { border-color: rgba(249,115,22,0.3); }
+        .sp-panel.accent-teal { border-color: rgba(20,184,166,0.3); }
+        .sp-panel.accent-purple { border-color: rgba(139,92,246,0.3); }
+
+        .sp-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; cursor: pointer;
+            background: var(--bg-card); user-select: none; transition: background 0.2s;
+        }
+        .sp-header:hover { background: var(--bg-hover); }
+        .sp-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .sp-chevron {
+            font-size: 10px; transition: transform 0.3s ease; color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .sp-panel.open .sp-chevron { transform: rotate(90deg); }
+
+        .sp-header-title {
+            font-size: 12px; font-weight: 700; color: var(--text-primary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sp-header-badge {
+            font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 50px;
+            flex-shrink: 0; white-space: nowrap;
+        }
+        .sp-header-badge.accent-orange { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+        .sp-header-badge.accent-teal { background: rgba(20,184,166,0.15); color: #14b8a6; }
+        .sp-header-badge.accent-purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+
+        .sp-header-right { display: flex; align-items: center; gap: 6px; }
+
+        .sp-body {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.35s ease;
+        }
+        .sp-panel.open .sp-body {
+            max-height: 5000px;
+        }
+        .sp-body-inner {
+            padding: 14px;
+        }
+
+        .btn-del-sp {
+            width: 24px; height: 24px; border: none; border-radius: 6px;
+            background: rgba(244,63,94,0.1); color: var(--accent-rose);
+            cursor: pointer; font-size: 10px; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-del-sp:hover { background: var(--accent-rose); color: white; }
+
+        /* ─── Sub-project Preview Separator ─── */
+        .sp-preview-divider {
+            margin: 40px 0;
+            border: none;
+            border-top: 2px dashed var(--border);
+            position: relative;
+        }
+        .sp-preview-divider::before {
+            content: '◆';
+            position: absolute; top: -10px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            padding: 0 14px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .sp-preview-header {
+            padding: 20px 24px; margin-bottom: 20px;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 14px; backdrop-filter: blur(10px);
+            border-top: 4px solid transparent;
+        }
+        .sp-preview-header.accent-orange { border-top-color: var(--accent-orange); }
+        .sp-preview-header.accent-teal { border-top-color: #14b8a6; }
+        .sp-preview-header.accent-purple { border-top-color: var(--accent-purple); }
+
+        .sp-preview-header h3 {
+            font-size: 18px; font-weight: 800;
+        }
+        .sp-preview-header.accent-orange h3 {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-amber));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sp-preview-header.accent-teal h3 {
+            background: linear-gradient(135deg, #14b8a6, var(--accent-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sp-preview-header.accent-purple h3 {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sp-preview-badges {
+            display: flex; gap: 10px; margin-top: 10px;
+        }
+
         @media (max-width: 900px) {
             .app-layout { grid-template-columns: 1fr; }
             .editor { border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
@@ -485,6 +609,14 @@
             <button class="btn-share" onclick="shareChart()">🔗 Partager le lien</button>
             <button class="btn-clear" onclick="clearAll()">Tout effacer</button>
         </div>
+
+        <!-- ═══ SUB-PROJECTS EDITOR ═══ -->
+        <hr class="subprojects-divider">
+        <div class="section">
+            <div class="subprojects-section-header">🗂 Sous-projets additionnels</div>
+            <div id="subProjectsList"></div>
+            <button class="btn-add-subproject" onclick="addSubProject()">+ Ajouter un sous-projet</button>
+        </div>
     </div>
 
     <!-- ═══ PREVIEW ═══ -->
@@ -516,6 +648,13 @@
 <script>
 let tasks = [];
 let taskIdCounter = 0;
+
+// ══════════════════════════════════════════
+// ═══════════  SUB-PROJECTS DATA  ═════════
+// ══════════════════════════════════════════
+let subProjects = [];
+let spIdCounter = 0;
+const SP_ACCENTS = ['accent-orange', 'accent-teal', 'accent-purple'];
 
 const COLORS = [
     '#ef4444','#b91c1c','#b45309','#2563eb','#16a34a','#15803d',
@@ -590,6 +729,112 @@ function darken(hex, amt) {
     return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
 }
 
+// ══════════════════════════════════════════
+// ═══  RENDER GANTT FOR A SET OF TASKS  ═══
+// ══════════════════════════════════════════
+function renderGanttSection(taskList, totalUnits, unitWidth, isJours) {
+    const step = isJours ? Math.max(1, Math.ceil(totalUnits / 40)) : 1;
+    const totalWidth = totalUnits * unitWidth;
+
+    // Task panel
+    let taskPanelHTML = `<div class="g-task-header">Désignation des tâches</div>`;
+    taskList.forEach(t => {
+        const isMilestone = t.start === t.end;
+        taskPanelHTML += `<div class="g-task-row">
+            <div class="g-task-dot" style="background:${t.color}"></div>
+            <div class="g-task-info">
+                <div class="g-task-name">${t.name || 'Sans nom'}</div>
+                <div class="g-task-dur">${isMilestone ? 'Jalon' : (t.duration || '')}</div>
+            </div>
+        </div>`;
+    });
+
+    // Timeline header
+    let timeHeaderHTML = '';
+    for (let m = 0; m <= totalUnits; m += step) {
+        let cls = '';
+        let label = `<span>${m}</span>`;
+        if (m === 0) { cls = ' first'; label = `<span>0</span><span class="msub">Début</span>`; }
+        else if (m >= totalUnits) { cls = ' last'; label = `<span>${totalUnits}</span><span class="msub">Fin</span>`; }
+        else if (!isJours && m % Math.max(1, Math.floor(totalUnits/6)) === 0) {
+            label = `<span>${m}</span><span class="msub">${isJours ? 'J' : 'Mois'} ${m}</span>`;
+        } else if (isJours && m % (step * 5) === 0) {
+            label = `<span>${m}</span><span class="msub">J${m}</span>`;
+        }
+        timeHeaderHTML += `<div class="g-month${cls}" style="width:${step * unitWidth}px">${label}</div>`;
+    }
+
+    // Bars
+    let barsHTML = '';
+    taskList.forEach((t, i) => {
+        let gridlines = '';
+        for (let m = 0; m <= totalUnits; m += step) {
+            gridlines += `<div class="g-gridline" style="left:${m * unitWidth}px"></div>`;
+        }
+        const isMilestone = t.start === t.end;
+        let barHTML = '';
+        const grad = `linear-gradient(135deg, ${t.color}, ${darken(t.color, 30)})`;
+        if (isMilestone) {
+            barHTML = `<div class="g-bar milestone" style="left:${t.start * unitWidth - 12}px;background:${grad};animation-delay:${i*0.05}s"><span>◆</span></div>`;
+        } else {
+            const left = t.start * unitWidth + 2;
+            const width = Math.max((t.end - t.start) * unitWidth - 4, 16);
+            let lbl = '';
+            if (width > 120) lbl = `${t.name}`;
+            else if (width > 60) lbl = t.duration;
+            barHTML = `<div class="g-bar" style="left:${left}px;width:${width}px;background:${grad};animation-delay:${i*0.05}s">${lbl}</div>`;
+        }
+        barsHTML += `<div class="g-bar-row">${gridlines}${barHTML}</div>`;
+    });
+
+    // Legend
+    let legendHTML = '<div class="g-legend"><span class="g-legend-title">Légende</span>';
+    taskList.forEach(t => {
+        const isMilestone = t.start === t.end;
+        legendHTML += `<div class="g-legend-item"><div class="g-legend-swatch" style="background:${t.color}"></div>${t.name || 'Sans nom'}${isMilestone ? '' : (t.duration ? ' : '+t.duration : '')}</div>`;
+    });
+    legendHTML += '</div>';
+
+    // Descriptions
+    let descHTML = '';
+    const hasAnyDesc = taskList.some(t => t.description && t.description.trim());
+    if (hasAnyDesc || taskList.length > 0) {
+        descHTML = '<div class="desc-section"><div class="desc-section-title">Description des tâches</div><div class="desc-cards">';
+        taskList.forEach((t, i) => {
+            const isMilestone = t.start === t.end;
+            descHTML += `<div class="desc-card" style="border-left-color:${t.color}">
+                <div class="desc-card-head">
+                    <div class="desc-card-dot" style="background:${t.color}"></div>
+                    <span class="desc-card-num">#${i+1}</span>
+                    <span class="desc-card-name">${t.name || 'Sans nom'}</span>
+                </div>
+                <div class="desc-card-meta">
+                    <span class="desc-card-tag">⏱ <strong>${isMilestone ? 'Jalon' : (t.duration || '—')}</strong></span>
+                    <span class="desc-card-tag">📅 ${isJours ? 'Jour' : 'Mois'} <strong>${t.start}</strong> → <strong>${t.end}</strong></span>
+                </div>
+                ${t.description && t.description.trim() ? `<div class="desc-card-text">${t.description}</div>` : '<div class="desc-card-empty">Aucune description ajoutée</div>'}
+            </div>`;
+        });
+        descHTML += '</div></div>';
+    }
+
+    return {
+        chartHTML: `<div class="gantt-chart-area">
+            <div class="gantt-grid">
+                <div class="g-task-panel">${taskPanelHTML}</div>
+                <div class="g-timeline">
+                    <div class="g-timeline-scroll" style="width:${totalWidth + unitWidth}px">
+                        <div class="g-timeline-header">${timeHeaderHTML}</div>
+                        ${barsHTML}
+                    </div>
+                </div>
+            </div>
+        </div>`,
+        legendHTML,
+        descHTML
+    };
+}
+
 function generateChart() {
     const title = document.getElementById('inTitle').value || 'PLANNING DE RÉALISATION';
     const subtitle = document.getElementById('inSubtitle').value || '';
@@ -599,9 +844,6 @@ function generateChart() {
     const unit = getUnit();
     const uLabel = unitLabelPlural();
     const isJours = unit === 'jours';
-    // For days mode, group timeline labels to avoid clutter
-    const step = isJours ? Math.max(1, Math.ceil(totalUnits / 40)) : 1;
-    const numCols = Math.floor(totalUnits / step) + 1;
 
     if (tasks.length === 0) { showToast('⚠ Ajoutez au moins une tâche'); return; }
 
@@ -620,108 +862,43 @@ function generateChart() {
         </div>
     </div>`;
 
-    // Task panel
-    let taskPanelHTML = `<div class="g-task-header">Désignation des tâches</div>`;
-    tasks.forEach(t => {
-        const isMilestone = t.start === t.end;
-        taskPanelHTML += `<div class="g-task-row">
-            <div class="g-task-dot" style="background:${t.color}"></div>
-            <div class="g-task-info">
-                <div class="g-task-name">${t.name || 'Sans nom'}</div>
-                <div class="g-task-dur">${isMilestone ? 'Jalon' : (t.duration || '')}</div>
-            </div>
-        </div>`;
-    });
+    // Main project gantt
+    const mainGantt = renderGanttSection(tasks, totalUnits, unitWidth, isJours);
 
-    // Timeline header
-    let timeHeaderHTML = '';
-    const totalWidth = totalUnits * unitWidth;
-    for (let m = 0; m <= totalUnits; m += step) {
-        let cls = '';
-        let label = `<span>${m}</span>`;
-        if (m === 0) { cls = ' first'; label = `<span>0</span><span class="msub">Début</span>`; }
-        else if (m >= totalUnits) { cls = ' last'; label = `<span>${totalUnits}</span><span class="msub">Fin</span>`; }
-        else if (!isJours && m % Math.max(1, Math.floor(totalUnits/6)) === 0) {
-            label = `<span>${m}</span><span class="msub">${isJours ? 'J' : 'Mois'} ${m}</span>`;
-        } else if (isJours && m % (step * 5) === 0) {
-            label = `<span>${m}</span><span class="msub">J${m}</span>`;
-        }
-        timeHeaderHTML += `<div class="g-month${cls}" style="width:${step * unitWidth}px">${label}</div>`;
-    }
-
-    // Bars
-    let barsHTML = '';
-    tasks.forEach((t, i) => {
-        let gridlines = '';
-        for (let m = 0; m <= totalUnits; m += step) {
-            gridlines += `<div class="g-gridline" style="left:${m * unitWidth}px"></div>`;
-        }
-
-        const isMilestone = t.start === t.end;
-        let barHTML = '';
-        const grad = `linear-gradient(135deg, ${t.color}, ${darken(t.color, 30)})`;
-
-        if (isMilestone) {
-            barHTML = `<div class="g-bar milestone" style="left:${t.start * unitWidth - 12}px;background:${grad};animation-delay:${i*0.05}s"><span>◆</span></div>`;
-        } else {
-            const left = t.start * unitWidth + 2;
-            const width = Math.max((t.end - t.start) * unitWidth - 4, 16);
-            let lbl = '';
-            if (width > 120) lbl = `${t.name}`;
-            else if (width > 60) lbl = t.duration;
-            barHTML = `<div class="g-bar" style="left:${left}px;width:${width}px;background:${grad};animation-delay:${i*0.05}s">${lbl}</div>`;
-        }
-
-        barsHTML += `<div class="g-bar-row">${gridlines}${barHTML}</div>`;
-    });
-
-    // Legend
-    let legendHTML = '<div class="g-legend"><span class="g-legend-title">Légende</span>';
-    tasks.forEach(t => {
-        const isMilestone = t.start === t.end;
-        legendHTML += `<div class="g-legend-item"><div class="g-legend-swatch" style="background:${t.color}"></div>${t.name || 'Sans nom'}${isMilestone ? '' : (t.duration ? ' : '+t.duration : '')}</div>`;
-    });
-    legendHTML += '</div>';
-
-    // Task descriptions section
-    let descHTML = '';
-    const hasAnyDesc = tasks.some(t => t.description && t.description.trim());
-    if (hasAnyDesc || tasks.length > 0) {
-        descHTML = '<div class="desc-section"><div class="desc-section-title">Description des tâches</div><div class="desc-cards">';
-        tasks.forEach((t, i) => {
-            const isMilestone = t.start === t.end;
-            descHTML += `<div class="desc-card" style="border-left-color:${t.color}">
-                <div class="desc-card-head">
-                    <div class="desc-card-dot" style="background:${t.color}"></div>
-                    <span class="desc-card-num">#${i+1}</span>
-                    <span class="desc-card-name">${t.name || 'Sans nom'}</span>
-                </div>
-                <div class="desc-card-meta">
-                    <span class="desc-card-tag">⏱ <strong>${isMilestone ? 'Jalon' : (t.duration || '—')}</strong></span>
-                    <span class="desc-card-tag">📅 ${isJours ? 'Jour' : 'Mois'} <strong>${t.start}</strong> → <strong>${t.end}</strong></span>
-                </div>
-                ${t.description && t.description.trim() ? `<div class="desc-card-text">${t.description}</div>` : '<div class="desc-card-empty">Aucune description ajoutée</div>'}
-            </div>`;
-        });
-        descHTML += '</div></div>';
-    }
-
-    preview.innerHTML = `
+    let fullHTML = `
         ${headerHTML}
-        <div class="gantt-chart-area">
-            <div class="gantt-grid">
-                <div class="g-task-panel">${taskPanelHTML}</div>
-                <div class="g-timeline">
-                    <div class="g-timeline-scroll" style="width:${totalWidth + unitWidth}px">
-                        <div class="g-timeline-header">${timeHeaderHTML}</div>
-                        ${barsHTML}
-                    </div>
+        ${mainGantt.chartHTML}
+        ${mainGantt.legendHTML}
+        ${mainGantt.descHTML}
+    `;
+
+    // ═══ SUB-PROJECTS PREVIEW ═══
+    subProjects.forEach((sp, spIdx) => {
+        if (!sp.tasks || sp.tasks.length === 0) return;
+        const spTotalUnits = parseInt(sp.totalUnits) || 16;
+        const spUnitWidth = parseInt(sp.unitWidth) || 75;
+        const spUnit = sp.unit || 'mois';
+        const spIsJours = spUnit === 'jours';
+        const accent = SP_ACCENTS[spIdx % SP_ACCENTS.length];
+
+        const spGantt = renderGanttSection(sp.tasks, spTotalUnits, spUnitWidth, spIsJours);
+
+        fullHTML += `
+            <hr class="sp-preview-divider">
+            <div class="sp-preview-header ${accent}">
+                <h3>${sp.title || 'Sous-projet ' + (spIdx + 1)}</h3>
+                <div class="sp-preview-badges">
+                    <div class="badge-item b1"><span style="color:var(--text-muted);font-weight:400">Délai :</span> ${spTotalUnits} ${spIsJours ? 'jours' : 'mois'}</div>
+                    <div class="badge-item b2"><span style="color:var(--text-muted);font-weight:400">Tâches :</span> ${sp.tasks.length}</div>
                 </div>
             </div>
-        </div>
-        ${legendHTML}
-        ${descHTML}
-    `;
+            ${spGantt.chartHTML}
+            ${spGantt.legendHTML}
+            ${spGantt.descHTML}
+        `;
+    });
+
+    preview.innerHTML = fullHTML;
 
     showToast('✓ Diagramme généré avec succès !');
     saveData();
@@ -743,6 +920,11 @@ function clearAll() {
     document.getElementById('ganttPreview').innerHTML = '';
     document.getElementById('emptyState').style.display = 'flex';
     localStorage.removeItem('ganttData');
+    // Also clear sub-projects
+    subProjects = [];
+    spIdCounter = 0;
+    localStorage.removeItem('ganttSubProjects');
+    renderSubProjectsList();
     showToast('Formulaire effacé');
 }
 
@@ -758,6 +940,7 @@ function showToast(msg) {
 // ══════════════════════════════════════════
 
 const STORAGE_KEY = 'ganttData';
+const SP_STORAGE_KEY = 'ganttSubProjects';
 
 function saveData() {
     const data = {
@@ -777,6 +960,26 @@ function saveData() {
         }))
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    // Save sub-projects separately
+    saveSubProjects();
+}
+
+function saveSubProjects() {
+    const spData = subProjects.map(sp => ({
+        title: sp.title,
+        totalUnits: sp.totalUnits,
+        unitWidth: sp.unitWidth,
+        unit: sp.unit || 'mois',
+        tasks: sp.tasks.map(t => ({
+            name: t.name,
+            duration: t.duration,
+            start: t.start,
+            end: t.end,
+            color: t.color,
+            description: t.description || ''
+        }))
+    }));
+    localStorage.setItem(SP_STORAGE_KEY, JSON.stringify(spData));
 }
 
 function loadData() {
@@ -827,10 +1030,49 @@ function loadData() {
     }
 }
 
+function loadSubProjects() {
+    const raw = localStorage.getItem(SP_STORAGE_KEY);
+    if (!raw) {
+        // Initialize with default sub-projects
+        initDefaultSubProjects();
+        return;
+    }
+    try {
+        const spData = JSON.parse(raw);
+        subProjects = [];
+        spIdCounter = 0;
+        spData.forEach(sp => {
+            const spTaskIdBase = spIdCounter * 1000;
+            let taskIdx = 0;
+            subProjects.push({
+                id: spIdCounter++,
+                title: sp.title || '',
+                totalUnits: sp.totalUnits || '16',
+                unitWidth: sp.unitWidth || '75',
+                unit: sp.unit || 'mois',
+                open: false,
+                tasks: (sp.tasks || []).map(t => ({
+                    id: spTaskIdBase + (taskIdx++),
+                    name: t.name || '',
+                    duration: t.duration || '',
+                    start: t.start || 0,
+                    end: t.end || 0,
+                    color: t.color || COLORS[taskIdx % COLORS.length],
+                    description: t.description || ''
+                }))
+            });
+        });
+        renderSubProjectsList();
+    } catch(e) {
+        console.warn('Erreur chargement sous-projets:', e);
+        initDefaultSubProjects();
+    }
+}
+
 // Auto-save on every input change in the editor
 document.querySelector('.editor').addEventListener('input', () => {
     // Sync task fields from DOM
-    document.querySelectorAll('.task-card').forEach((card, i) => {
+    document.querySelectorAll('#taskList .task-card').forEach((card, i) => {
         if (i >= tasks.length) return;
         const inputs = card.querySelectorAll('input');
         const textarea = card.querySelector('.task-card-desc textarea');
@@ -843,8 +1085,159 @@ document.querySelector('.editor').addEventListener('input', () => {
         });
         if (textarea) tasks[i].description = textarea.value;
     });
+    // Sync sub-project fields from DOM
+    syncSubProjectsFromDOM();
     saveData();
 });
+
+// ══════════════════════════════════════════
+// ═══════════  SUB-PROJECTS  ══════════════
+// ══════════════════════════════════════════
+
+function addSubProject(title='', totalUnits='16', unitWidth='75', unit='mois', tasksList=null) {
+    const id = spIdCounter++;
+    const sp = {
+        id,
+        title,
+        totalUnits,
+        unitWidth,
+        unit,
+        open: true,
+        tasks: tasksList || []
+    };
+    subProjects.push(sp);
+    renderSubProjectsList();
+    saveSubProjects();
+}
+
+function removeSubProject(id) {
+    if (!confirm('Supprimer ce sous-projet ?')) return;
+    subProjects = subProjects.filter(sp => sp.id !== id);
+    renderSubProjectsList();
+    saveSubProjects();
+}
+
+function toggleSubProject(id) {
+    const sp = subProjects.find(s => s.id === id);
+    if (sp) { sp.open = !sp.open; renderSubProjectsList(); }
+}
+
+function addSubProjectTask(spId) {
+    const sp = subProjects.find(s => s.id === spId);
+    if (!sp) return;
+    const color = COLORS[sp.tasks.length % COLORS.length];
+    sp.tasks.push({ id: Date.now(), name: '', duration: '', start: 0, end: 0, color, description: '' });
+    renderSubProjectsList();
+    saveSubProjects();
+}
+
+function removeSubProjectTask(spId, taskId) {
+    const sp = subProjects.find(s => s.id === spId);
+    if (!sp) return;
+    sp.tasks = sp.tasks.filter(t => t.id !== taskId);
+    renderSubProjectsList();
+    saveSubProjects();
+}
+
+function syncSubProjectsFromDOM() {
+    subProjects.forEach((sp, spIdx) => {
+        const panel = document.querySelector(`.sp-panel[data-sp-id="${sp.id}"]`);
+        if (!panel) return;
+        const titleInput = panel.querySelector('.sp-title-input');
+        if (titleInput) sp.title = titleInput.value;
+        const totalInput = panel.querySelector('.sp-total-input');
+        if (totalInput) sp.totalUnits = totalInput.value;
+        const widthInput = panel.querySelector('.sp-width-input');
+        if (widthInput) sp.unitWidth = widthInput.value;
+
+        const taskCards = panel.querySelectorAll('.task-card');
+        taskCards.forEach((card, i) => {
+            if (i >= sp.tasks.length) return;
+            const inputs = card.querySelectorAll('input');
+            const textarea = card.querySelector('.task-card-desc textarea');
+            inputs.forEach(inp => {
+                if (inp.type === 'color') sp.tasks[i].color = inp.value;
+                else if (inp.placeholder?.includes('Nom')) sp.tasks[i].name = inp.value;
+                else if (inp.placeholder?.includes('Durée')) sp.tasks[i].duration = inp.value;
+                else if (inp.placeholder?.includes('Début')) sp.tasks[i].start = parseFloat(inp.value) || 0;
+                else if (inp.placeholder?.includes('Fin')) sp.tasks[i].end = parseFloat(inp.value) || 0;
+            });
+            if (textarea) sp.tasks[i].description = textarea.value;
+        });
+    });
+}
+
+function renderSubProjectsList() {
+    const container = document.getElementById('subProjectsList');
+    container.innerHTML = '';
+    subProjects.forEach((sp, spIdx) => {
+        const accent = SP_ACCENTS[spIdx % SP_ACCENTS.length];
+        const div = document.createElement('div');
+        div.className = `sp-panel ${accent}${sp.open ? ' open' : ''}`;
+        div.setAttribute('data-sp-id', sp.id);
+
+        const displayTitle = sp.title || 'Sous-projet ' + (spIdx + 1);
+        const taskCount = sp.tasks.length;
+
+        let tasksHTML = '';
+        sp.tasks.forEach((task, ti) => {
+            tasksHTML += `
+            <div class="task-card">
+                <div class="task-card-top">
+                    <input type="color" value="${task.color}" onchange="subProjects[${spIdx}].tasks[${ti}].color=this.value">
+                    <div class="task-card-fields">
+                        <input type="text" value="${escAttr(task.name)}" placeholder="Nom de la tâche" onchange="subProjects[${spIdx}].tasks[${ti}].name=this.value">
+                        <input type="text" value="${escAttr(task.duration)}" placeholder="Durée" onchange="subProjects[${spIdx}].tasks[${ti}].duration=this.value">
+                        <input type="number" value="${task.start}" placeholder="Début (M)" step="0.5" min="0" onchange="subProjects[${spIdx}].tasks[${ti}].start=parseFloat(this.value)||0">
+                        <input type="number" value="${task.end}" placeholder="Fin (M)" step="0.5" min="0" onchange="subProjects[${spIdx}].tasks[${ti}].end=parseFloat(this.value)||0">
+                    </div>
+                    <button class="btn-del" onclick="removeSubProjectTask(${sp.id},${task.id})">✕</button>
+                </div>
+                <div class="task-card-desc">
+                    <textarea placeholder="Description de la tâche (optionnel)..." onchange="subProjects[${spIdx}].tasks[${ti}].description=this.value">${task.description || ''}</textarea>
+                </div>
+            </div>`;
+        });
+
+        div.innerHTML = `
+            <div class="sp-header" onclick="toggleSubProject(${sp.id})">
+                <div class="sp-header-left">
+                    <span class="sp-chevron">▶</span>
+                    <span class="sp-header-title">${escHtml(displayTitle)}</span>
+                    <span class="sp-header-badge ${accent}">${taskCount} tâche${taskCount !== 1 ? 's' : ''} · ${sp.totalUnits || '16'} mois</span>
+                </div>
+                <div class="sp-header-right">
+                    <button class="btn-del-sp" onclick="event.stopPropagation();removeSubProject(${sp.id})">✕</button>
+                </div>
+            </div>
+            <div class="sp-body">
+                <div class="sp-body-inner">
+                    <div class="field">
+                        <label>Titre du sous-projet</label>
+                        <input type="text" class="sp-title-input" value="${escAttr(sp.title)}" placeholder="Ex: Résidence et Poste Transformateur">
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label>Durée totale (mois)</label>
+                            <input type="number" class="sp-total-input" value="${sp.totalUnits}" min="1" max="500">
+                        </div>
+                        <div class="field">
+                            <label>Largeur par mois (px)</label>
+                            <input type="number" class="sp-width-input" value="${sp.unitWidth}" min="10" max="150">
+                        </div>
+                    </div>
+                    <div class="section-title" style="margin-top:14px">Tâches du sous-projet</div>
+                    <div class="task-list">${tasksHTML}</div>
+                    <button class="btn-add" onclick="addSubProjectTask(${sp.id})" style="margin-top:8px">+ Ajouter une tâche</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function escAttr(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ══════════════════════════════════════════
 // ═══════ DONNÉES PAR DÉFAUT (V2 16 MOIS) ═
@@ -873,6 +1266,78 @@ const DEFAULT_DATA = {
     ]
 };
 
+const DEFAULT_SUBPROJECTS = [
+    {
+        title: "Résidence et Poste Transformateur",
+        totalUnits: "16",
+        unitWidth: "75",
+        unit: "mois",
+        tasks: [
+            { name: "Terrassement et excavation", duration: "15 jrs", start: 0, end: 0.5, color: "#ef4444", description: "Terrassement et excavation" },
+            { name: "R.O. Infrastructure", duration: "45 jrs", start: 0.5, end: 2, color: "#b91c1c", description: "Infrastructure gros œuvre" },
+            { name: "G.O. Superstructure + étanchéité", duration: "2 mois", start: 2, end: 4, color: "#b45309", description: "Gros œuvre superstructure et étanchéité" },
+            { name: "Maçonnerie et enduits", duration: "45 jrs", start: 2, end: 3.5, color: "#16a34a", description: "Maçonnerie et enduits intérieurs/extérieurs" },
+            { name: "Électricité et plomberie", duration: "45 jrs", start: 3, end: 4.5, color: "#0ea5e9", description: "Électricité et plomberie" },
+            { name: "Équipements", duration: "1 mois", start: 4, end: 5, color: "#7c3aed", description: "Équipements techniques" },
+            { name: "Finition sol, mur, faux plafond + menuiserie", duration: "20 jrs", start: 4, end: 4.67, color: "#c2410c", description: "Finition sol, mur et faux plafond + menuiserie" },
+            { name: "Appareillage électrique + sanitaire + peinture", duration: "15 jrs", start: 4.67, end: 5.17, color: "#ec4899", description: "Appareillage électrique et plomberie sanitaire + peinture" },
+            { name: "Nettoyage et réception provisoire partielle", duration: "10 jrs", start: 5.17, end: 5.5, color: "#eab308", description: "Nettoyage et réception provisoire partielle" }
+        ]
+    },
+    {
+        title: "VRD — Voirie et Réseaux Divers",
+        totalUnits: "16",
+        unitWidth: "75",
+        unit: "mois",
+        tasks: [
+            { name: "Terrassement général, voirie et tranchées", duration: "4 mois", start: 3, end: 7, color: "#15803d", description: "Terrassement, voirie et tranchées par canalisation, tuyauterie" },
+            { name: "Assainissement, AEP, gaz, fibre optique, éclairage", duration: "2 mois 15 jrs", start: 4, end: 6.5, color: "#0ea5e9", description: "Assainissement, AEP, gaz, fibre optique et éclairage public, réseaux d'incendie" },
+            { name: "Pose regards, lit de sable, réseaux hydrauliques", duration: "2 mois 15 jrs", start: 4, end: 6.5, color: "#7c3aed", description: "Pose de regards, pose de lit de sable, hydraulique, cuvelage, fibre optique, gaz" },
+            { name: "Corps de chaussée et arches de base", duration: "3 mois", start: 11, end: 14, color: "#b45309", description: "Corps de chaussée de la arche de base au sein bâtiment" },
+            { name: "Plan d'éclairage public (lampadaires, luminaires)", duration: "2 mois", start: 14, end: 16, color: "#eab308", description: "Plan d'éclairage public, lampadaires, contres et luminaires" },
+            { name: "Nettoyage et réception provisoire partielle", duration: "20 jrs", start: 16, end: 16.67, color: "#14b8a6", description: "Nettoyage et réception provisoire partielle" }
+        ]
+    },
+    {
+        title: "BS/ESUR — Bâtiment Secondaire",
+        totalUnits: "16",
+        unitWidth: "75",
+        unit: "mois",
+        tasks: [
+            { name: "Finition sol, mur, faux plafond + menuiserie", duration: "20 jrs", start: 4, end: 4.67, color: "#c2410c", description: "Finition sol, mur et faux plafond + menuiserie" },
+            { name: "Appareillage électrique + sanitaire + peinture", duration: "15 jrs", start: 4.67, end: 5.17, color: "#ec4899", description: "Appareillage électrique et sanitaire + peinture" },
+            { name: "Nettoyage et réception provisoire partielle", duration: "10 jrs", start: 5.17, end: 5.5, color: "#eab308", description: "Nettoyage et réception provisoire partielle" }
+        ]
+    }
+];
+
+function initDefaultSubProjects() {
+    subProjects = [];
+    spIdCounter = 0;
+    DEFAULT_SUBPROJECTS.forEach(spData => {
+        let taskIdx = 0;
+        subProjects.push({
+            id: spIdCounter++,
+            title: spData.title,
+            totalUnits: spData.totalUnits,
+            unitWidth: spData.unitWidth,
+            unit: spData.unit,
+            open: false,
+            tasks: spData.tasks.map(t => ({
+                id: Date.now() + (taskIdx++),
+                name: t.name,
+                duration: t.duration,
+                start: t.start,
+                end: t.end,
+                color: t.color,
+                description: t.description
+            }))
+        });
+    });
+    renderSubProjectsList();
+    saveSubProjects();
+}
+
 // ══════════════════════════════════════════
 // ═══════════  PARTAGE PAR LIEN  ══════════
 // ══════════════════════════════════════════
@@ -888,6 +1353,16 @@ function buildShareData() {
         tasks: tasks.map(t => ({
             n: t.name, d: t.duration, s: t.start, e: t.end,
             c: t.color, desc: t.description || ''
+        })),
+        sp: subProjects.map(sp => ({
+            t: sp.title,
+            tu: sp.totalUnits,
+            uw: sp.unitWidth,
+            u: sp.unit || 'mois',
+            tasks: sp.tasks.map(t => ({
+                n: t.name, d: t.duration, s: t.start, e: t.end,
+                c: t.color, desc: t.description || ''
+            }))
         }))
     };
 }
@@ -959,6 +1434,34 @@ function loadFromUrlHash() {
             });
         }
         renderTaskList();
+
+        // Load sub-projects from share URL
+        subProjects = [];
+        spIdCounter = 0;
+        if (data.sp && data.sp.length > 0) {
+            data.sp.forEach(sp => {
+                let taskIdx = 0;
+                subProjects.push({
+                    id: spIdCounter++,
+                    title: sp.t || '',
+                    totalUnits: sp.tu || '16',
+                    unitWidth: sp.uw || '75',
+                    unit: sp.u || 'mois',
+                    open: false,
+                    tasks: (sp.tasks || []).map(t => ({
+                        id: Date.now() + (taskIdx++),
+                        name: t.n || '',
+                        duration: t.d || '',
+                        start: t.s ?? 0,
+                        end: t.e ?? 0,
+                        color: t.c || COLORS[taskIdx % COLORS.length],
+                        description: t.desc || ''
+                    }))
+                });
+            });
+        }
+        renderSubProjectsList();
+
         if (tasks.length > 0) generateChart();
         
         // Save to localStorage for persistence
@@ -984,6 +1487,8 @@ if (!loadFromUrlHash()) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
         loadData();
     }
+    // Load sub-projects (from storage or defaults)
+    loadSubProjects();
 }
 </script>
 
